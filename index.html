@@ -7,7 +7,6 @@
   <title>Galaga</title>
   <link rel="stylesheet" type="text/css" href="main.css">
   <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
-  
 
 </head>
 <body>
@@ -15,21 +14,109 @@
     <div id="marquee"></div>
     <div id="left"></div>
     <div id="screens">
-      <div id="main-menu" class="screen"></div>
-      <div id="game-screen" class="screen active">
+      <div id="main-menu" class="screen">
+        <h1>Galaga</h1>
+        <ul>
+          <li><button id="new-game-button" class="menu-button">New Game</button></li>
+          <li><button id="high-scores-button" class="menu-button">High Scores</button></li>
+          <li><button id="controls-button" class="menu-button">Controls</button></li>
+          <li><button id="about-button" class="menu-button">About</button></li>
+        </ul>
+      </div>
+      <div id="game-screen" class="screen">
         <canvas
           id="game-canvas"
           width="960"
           height="1280"
         ></canvas>
       </div>
-      <!-- <div id="" class="screen"></div>
-      <div id="" class="screen"></div>
-      <div id="" class="screen"></div>
-      <div id="" class="screen"></div>
-      <div id="" class="screen"></div>
-      <div id="" class="screen"></div>
-      <div id="" class="screen"></div> -->
+      <div id="pause-screen" class="screen">
+        <h1>Game Paused</h1>
+        <ul>
+          <li><button id="pause-resume" class='menu-button'>Resume</button></li>
+          <li><button id="pause-quit" class='menu-button'>Quit</button></li>
+        </ul>
+      </div>
+      <div id="game-over" class="screen">
+        <h1
+          class="game-title"
+          onclick="game.controller.showScreen('main-menu')"
+        >
+          Game Over
+        </h1>
+        <h3>You Scored</h3>
+        <p id="player-score"></p>
+        <h3>Your Name</h3>
+        <input id="player-name-input" type="text" placeholder="Enter your name">
+        <button
+          id="score-save-button"
+          class="menu-button"
+        >
+          Save
+        </button>
+      </div>
+      <div id="high-scores" class="screen">
+        <h1 
+          class="game-title"
+          onclick="game.controller.showScreen('main-menu')"
+        >
+          Galaga
+        </h1>
+        <div id="high-scores-table"></div>
+        <button
+          id="clear-high-scores"
+          class="menu-button"
+        >
+          Clear High Scores
+        </button>
+        <button 
+          id="high-scores-back"
+          class="menu-button"
+        >
+          Back
+        </button>
+      </div>
+      <div id="controls" class="screen">
+        <h1
+          class="game-title"
+          onclick="game.controller.showScreen('main-menu')"
+        >
+          Galaga
+        </h1>
+        <h3>Controls</h3>
+        <p>Select a control and then press a key to map a new input</p>
+        <div id="assign-controls-div"></div>
+        <p>The menu can be navigated using the either the mouse or the arrow keys, Escape, and Enter.</p>
+        <button
+          class="menu-button"
+          id="controls-reset"
+        >
+          Reset Controls
+        </button>
+        <button 
+          class="menu-button"
+          id="controls-back"
+        >
+          Back
+        </button>        
+      </div>
+      <div id="about" class="screen">
+        <h1
+          class="game-title"
+          onclick="game.controller.showScreen('main-menu')"
+        >
+          Galaga
+        </h1>
+        <h3>About</h3>
+        <h4>Developed By:</h4>
+        <p>Nick Rodgers</p>
+        <button 
+          id="about-back"
+          class="menu-button"
+        >
+          Back
+        </button>
+      </div>
     </div>
     <div id="right"></div>
   </main>

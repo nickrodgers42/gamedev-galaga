@@ -2,10 +2,11 @@ class Game {
     constructor() {
         this.assets = {}
         this.screens = {}
-    }
-
-    init = () => {
-        this.screens['main-menu'] = new MainMenu('hello world')
+        this.defaultControls = {
+            'Fire': ' ',
+            'Move Left': 'ArrowLeft',
+            'Move Right': 'ArrowRight'
+        }
     }
 }
 
@@ -31,7 +32,7 @@ class Loader {
                     this.scripts,
                     () => {
                         console.log('Scripts loaded.')
-                        this.game.init();
+                        this.game.loaded = true
                     }
                 )
             }
@@ -127,10 +128,29 @@ const game = new Game()
 const assetsList = []
 const scriptList = [
     {
-        scripts: ['screens/main-menu'],
+        scripts: [
+            'components/storageController',
+            'components/inputHandler',
+            'components/controller',
+            'screens/screen',
+            'screens/main-menu',
+            'screens/controls-screen',
+            'screens/high-scores',
+            'screens/about',
+            'gameLoop'
+        ],
         message: 'Main menu loaded',
         onComplete: () => {
-            game.screens['main-menu'] = new MainMenu()
+            game.storageController = new StorageController('gamedev-galaga')
+            game.inputHandler = new InputHandler()
+            game.controller = new Controller(game.screens, game.inputHandler, 'main-menu')
+            game.gameLoop = new GameLoop(game.controller, game.inputHandler, game.defaultControls)
+
+            game.screens['main-menu'] = new MainMenu(game.controller, game.inputHandler)
+            game.screens['controls'] = new ControlsScreen(game.controller,game.inputHandler, game.defaultControls)
+            game.screens['high-scores'] = new HighScores(game.controller, game.storageController)
+            game.screens['about'] = new About(game.controller)
+            game.controller.init()
         }
     }
 ]

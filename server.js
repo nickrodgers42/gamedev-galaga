@@ -8,7 +8,8 @@ const mimeTypes = {
     '.png' : 'image/png',
     '.jpg' : 'image/jpeg',
     '.mp3' : 'audio/mpeg3',
-    '.ico': 'image/x-icon'
+    '.ico': 'image/x-icon',
+    '.gif': 'image/gif'
 }
 
 const port = 3000

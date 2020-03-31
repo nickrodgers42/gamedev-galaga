@@ -1,6 +1,7 @@
 class Galaga {
     constructor(assets, gameStyle) {
         this.level = 1
+        this.paused = true
         this.assets = assets
         this.gameStyle = gameStyle
         this.canvas = document.getElementById('game-canvas')
@@ -19,9 +20,15 @@ class Galaga {
     }
 
     render = () => {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
         if (this.gameStyle['Style'] !== 'GameDev') {
+            this.context.save()
+            this.context.fillStyle = '#000000'
+            this.context.fillRect(0, 0, this.canvas.width, this.canvas.height)
+            this.context.restore()
             this.stars.render(this.context)
+        }
+        else {
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
         }
     }
 

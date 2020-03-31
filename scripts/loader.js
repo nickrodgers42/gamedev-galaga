@@ -9,7 +9,7 @@ class Game {
             'Pause': 'Escape'
         }
         this.gameStyle = {
-            'Style': 'GameDev'
+            'Style': 'Retro'
         }
         this.init = () => {
             this.storageController = new StorageController('gamedev-galaga')
@@ -107,7 +107,7 @@ class Loader {
             xhr.onload = () => {
                 let asset = null
                 if (xhr.status === 200) {
-                    if (fileExtension === 'png' || fileExtension === 'jpg') {
+                    if (fileExtension === 'png' || fileExtension === 'jpg' || fileExtension === 'gif') {
                         asset = new Image()
                     }
                     else if (fileExtension === 'mp3') {

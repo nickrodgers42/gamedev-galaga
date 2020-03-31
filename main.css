@@ -1,0 +1,104 @@
+:root {
+    --background-color: black;
+    --body-font: 'Press Start 2P', cursive;
+}
+
+body {
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    display: grid;
+    grid-template-areas:
+        'top top top'
+        'left middle right'
+        'bottom bottom bottom';
+    gap: 1rem;
+    grid-template-columns: 1fr 2fr 1fr;
+    max-width: 1000px;
+    height: 100vh;
+    margin: auto;
+    justify-items: center;
+    align-items: center;
+    justify-content: center;
+}
+
+#game-canvas {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center; 
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#screens {
+    border: 3px solid red; 
+    grid-area: middle;
+    height: 0;
+    width: 100%;
+    overflow: hidden;
+    padding-top: calc((4 / 3) * 100%);
+    position: relative;
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+canvas {
+    background-color: black;
+}
+
+#left {
+    grid-area: left;
+}
+
+#right {
+    grid-area: right;
+}
+
+#marquee {
+    grid-area: top;
+    background-image: url("assets/images/cabinet-marquee.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#left, #right {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background-image: url("assets/images/cabinet-side.jpg");
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+@media screen and (max-width: 700px) {
+    main {
+        grid-template-areas: 
+            "top"
+            "middle"
+            "bottom";
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 3fr 1fr;
+        margin: auto;
+        width: 80%;
+    }
+}
+
+.active {
+    display: block;
+}

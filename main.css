@@ -1,9 +1,23 @@
 :root {
     --background-color: black;
-    --button-color: #b9ebe3;
-    --button-color-hover: #00ffff;
-    --title-font: 'sans-serif';
+    --button-color: transparent;
+    --button-font-color: #00ffff;
+    --button-color-hover: #3b3b3b;
+    --title-font: 'Press Start 2p', cursive;
     --body-font: 'Press Start 2P', cursive;
+}
+
+h1, h3, h4 {
+    font-family: var(--title-font);
+}
+
+h1 {
+    cursor: pointer;
+}
+
+p {
+    font-family: var(--body-font);
+    font-size: 14px;
 }
 
 body {
@@ -20,6 +34,7 @@ main {
         'bottom bottom bottom';
     gap: 1rem;
     grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: 1fr 3fr 1fr;
     max-width: 1000px;
     height: 100vh;
     margin: auto;
@@ -36,6 +51,10 @@ main {
     padding: 0;
     width: 100%;
     height: 100%;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 
 #screens {
@@ -87,6 +106,7 @@ ul {
     border: none;
     font-family: var(--body-font, sans-serif);
     background-color: var(--button-color);
+    color: var(--button-font-color, white);
 }
 
 
@@ -101,15 +121,16 @@ ul {
 }
 
 .control-button {
-    font-size: 18px;
+    font-size: 10px;
     border-radius: 5px;
     min-width: 120px;
     border: none;
     font-family: var(--body-font, 'sans-serif');
+    color: var(--button-font-color, 'white');
     background-color: var(--button-color);
 }
 
-#assign-controls-div {
+#assign-controls-div, #game-style-div {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
@@ -119,13 +140,15 @@ ul {
     line-height: 0;
 }
 
-#assign-controls-div div .selected-button, .control-button:hover {
-    font-size: 20px;
+#assign-controls-div div .selected-button, 
+.control-button:hover,
+#game-style-div div .selected-button {
+    font-size: 12px;
     min-width: 140px;
     background-color: var(--button-color-hover);
 }
 
-#assign-controls-div div {
+#assign-controls-div div, #game-style-div div {
     display: flex;
     justify-content: space-between;
     margin: 2px;
@@ -178,6 +201,8 @@ ul {
 
 table {
     margin: auto;
+    width: 80%;
+    font-family: var(--body-font);
 }
 
 table, td, th {

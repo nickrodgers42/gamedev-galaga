@@ -1,16 +1,18 @@
 class GameLoop {
-    constructor(controller, inputHandler, controlMap) {
+    constructor(controller, inputHandler, controlMap, gameStyle, assets) {
         this.controller = controller
         this.inputHandler = inputHandler
         this.previousTime = performance.now()
         requestAnimationFrame(this.gameLoop)
         this.controlMap = controlMap
+        this.gameStyle = gameStyle
+        this.assets = assets
         this.game = null
     }
 
     runGame = () => {
         if (this.game === null) {
-            // this.game = new LanderGame()
+            this.game = new Galaga(this.assets, this.gameStyle)
         }
         this.registerGameControls()
         if (this.game !== null) {
@@ -40,27 +42,23 @@ class GameLoop {
     registerGameControls = () => {
         if (this.game !== null) {
             this.inputHandler.unregisterAllCommands()
-            // this.inputHandler.registerCommand(
-            //     this.controlMap['Thrust'],
-            //     this.game.thrustLander
-            // )
-            // this.inputHandler.registerKeyReleaseCommand(
-            //     this.controlMap['Thrust'],
-            //     this.game.stopLanderThrust
-            // )
-            // this.inputHandler.registerCommand(
-            //     this.controlMap['Rotate Left'],
-            //     this.game.rotateLanderLeft
-            // )
-            // this.inputHandler.registerCommand(
-            //     this.controlMap['Rotate Right'],
-            //     this.game.rotateLanderRight
-            // )
-            // this.inputHandler.registerCommand(
-            //     this.controlMap['Pause'],
-            //     (elapsedTime) => this.pauseGame(),
-            //     true
-            // )
+            this.inputHandler.registerCommand(
+                this.controlMap['Move Left'],
+                this.game.shipMoveLeft
+            )
+            this.inputHandler.registerKeyReleaseCommand(
+                this.controlMap['Move Right'],
+                this.game.shipMoveRight
+            )
+            this.inputHandler.registerCommand(
+                this.controlMap['Fire'],
+                this.game.shipFire
+            )
+            this.inputHandler.registerCommand(
+                this.controlMap['Pause'],
+                (elapsedTime) => this.pauseGame(),
+                true
+            )
         }
     }
 

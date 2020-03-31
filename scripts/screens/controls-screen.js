@@ -73,7 +73,8 @@ class ControlsScreen extends Screen {
                     class="control-button"
                     id="${this.buttonIds[control]}-remap-button"
                 >
-                    ${this.controlMap[control]}
+                    ${(this.controlMap[control] === ' ') ? 
+                        'Space' : this.controlMap[control]}
                 </button></div>
                 </div>`
         }

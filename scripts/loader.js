@@ -5,7 +5,26 @@ class Game {
         this.defaultControls = {
             'Fire': ' ',
             'Move Left': 'ArrowLeft',
-            'Move Right': 'ArrowRight'
+            'Move Right': 'ArrowRight',
+            'Pause': 'Escape'
+        }
+        this.gameStyle = {
+            'Style': 'GameDev'
+        }
+        this.init = () => {
+            this.storageController = new StorageController('gamedev-galaga')
+            this.inputHandler = new InputHandler()
+            this.controller = new Controller(this.screens, this.inputHandler, 'main-menu')
+            this.gameLoop = new GameLoop(this.controller, this.inputHandler, this.defaultControls, this.gameStyle, this.assets)
+
+            this.screens['main-menu'] = new MainMenu(this.controller, this.inputHandler)
+            this.screens['controls'] = new ControlsScreen(this.controller,this.inputHandler, this.defaultControls)
+            this.screens['high-scores'] = new HighScores(this.controller, this.storageController)
+            this.screens['about'] = new About(this.controller, this.gameStyle)
+            this.screens['game-screen'] = new GameScreen(this.controller, this.inputHandler, this.gameLoop, this.defaultControls)
+            this.screens['pause-screen'] = new PauseScreen(this.controller, this.inputHandler, this.gameLoop)
+            this.screens['game-over'] = new GameOver(this.controller, this.storageController)
+            this.controller.init()
         }
     }
 }
@@ -32,6 +51,7 @@ class Loader {
                     this.scripts,
                     () => {
                         console.log('Scripts loaded.')
+                        this.game.init()
                         this.game.loaded = true
                     }
                 )
@@ -64,7 +84,6 @@ class Loader {
         this.loadAsset(
             assetEntry.source,
             (asset) => {
-                assetEntry.onComplete(asset)
                 onSuccess(assetEntry, asset)
                 assets.shift()
                 this.loadAssets(assets, onSuccess, onError, onComplete)
@@ -125,14 +144,25 @@ class Loader {
 
 const game = new Game()
 
-const assetsList = []
+const assetsList = [
+    {
+        key: 'ship',
+        source: '../assets/images/ship.png',
+    }
+]
 const scriptList = [
     {
         scripts: [
             'components/storageController',
             'components/inputHandler',
             'components/controller',
-            'screens/screen',
+            'screens/screen'
+        ],
+        message: 'Initial Components Loaded',
+        onComplete: null
+    },
+    {
+        scripts: [
             'screens/main-menu',
             'screens/controls-screen',
             'screens/high-scores',
@@ -140,18 +170,24 @@ const scriptList = [
             'gameLoop'
         ],
         message: 'Main menu loaded',
-        onComplete: () => {
-            game.storageController = new StorageController('gamedev-galaga')
-            game.inputHandler = new InputHandler()
-            game.controller = new Controller(game.screens, game.inputHandler, 'main-menu')
-            game.gameLoop = new GameLoop(game.controller, game.inputHandler, game.defaultControls)
-
-            game.screens['main-menu'] = new MainMenu(game.controller, game.inputHandler)
-            game.screens['controls'] = new ControlsScreen(game.controller,game.inputHandler, game.defaultControls)
-            game.screens['high-scores'] = new HighScores(game.controller, game.storageController)
-            game.screens['about'] = new About(game.controller)
-            game.controller.init()
-        }
+        onComplete: null
+    },
+    {
+        scripts: [
+            'galaga',
+            'screens/game-screen',
+            'screens/game-over',
+            'screens/pause-screen',
+            'components/particle',
+            'components/particleSystem',
+            'components/point2d',
+            'components/random',
+            'components/ship',
+            'components/player',
+            'components/stars'
+        ],
+        message: 'Game Loaded',
+        onComplete: null
     }
 ]
 

@@ -44,15 +44,16 @@ class GameLoop {
             this.inputHandler.unregisterAllCommands()
             this.inputHandler.registerCommand(
                 this.controlMap['Move Left'],
-                this.game.shipMoveLeft
+                this.game.playerMoveLeft
             )
-            this.inputHandler.registerKeyReleaseCommand(
+            this.inputHandler.registerCommand(
                 this.controlMap['Move Right'],
-                this.game.shipMoveRight
+                this.game.playerMoveRight
             )
             this.inputHandler.registerCommand(
                 this.controlMap['Fire'],
-                this.game.shipFire
+                this.game.playerFire,
+                true
             )
             this.inputHandler.registerCommand(
                 this.controlMap['Pause'],

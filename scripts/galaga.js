@@ -6,7 +6,14 @@ class Galaga {
         this.gameStyle = gameStyle
         this.canvas = document.getElementById('game-canvas')
         this.context = this.canvas.getContext('2d')
-        this.player = new Player(this.assets['ship'])
+        this.missileSystem = new MissileSystem(this)
+        this.player = new Player(
+            this.assets['ship'], 
+            this.assets['shoot'],
+            this.missileSystem,
+            this.canvas.width,
+            this.canvas.height
+        )
         this.stars = (this.gameStyle['Style'] == 'GameDev') ? null : new Stars(100, this.canvas.width, this.canvas.height)
         this.levelIndicators = {
             50: assets['indicator-50'],
@@ -28,10 +35,13 @@ class Galaga {
         if (this.gameStyle['Style'] !== 'GameDev') {
             this.stars.update(elapsedTime)
         }
+        this.missileSystem.update(elapsedTime)
     }
 
     render = () => {
         this.drawBackground()
+        this.missileSystem.render(this.context)
+        this.player.render(this.context)
         this.renderGameStatus()
     }
 
@@ -94,15 +104,15 @@ class Galaga {
         }
     }
 
-    shipMoveLeft = (elapsedTime) => {
-        this.ship.moveLeft(elapsedTime)
+    playerMoveLeft = (elapsedTime) => {
+        this.player.moveLeft(elapsedTime)
     }
 
-    shipMoveRight = (elapsedTime) => {
-        this.ship.moveRight(elapsedTime)
+    playerMoveRight = (elapsedTime) => {
+        this.player.moveRight(elapsedTime)
     }
 
-    shipFire = (elapsedTime) => {
-        this.ship.fire(elapsedTime)
+    playerFire = (elapsedTime) => {
+        this.player.fire()
     }
 }

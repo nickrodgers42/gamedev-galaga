@@ -4,6 +4,10 @@ class Point2d {
         this.y = y
     }
 
+    copy = () => {
+        return new Point2d(this.x, this.y)
+    }
+
     distanceTo(x, y=0) {
         const otherPoint = new Point2d()
         if (x instanceof Point2d) {

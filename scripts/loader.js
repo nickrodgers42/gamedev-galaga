@@ -152,6 +152,18 @@ const assetsList = [
     {
         key: 'life',
         source: '../assets/images/life.png'
+    },
+    {
+        key: 'player-missile',
+        source: '../assets/images/player-missile.png'
+    },
+    {
+        key: 'enemy-missilee',
+        source: '../assets/images/enemy-missile.png'
+    },
+    {
+        key: 'shoot',
+        source: '../assets/audio/shoot.mp3'
     }
 ]
 
@@ -196,7 +208,9 @@ const scriptList = [
             'components/point2d',
             'components/random',
             'components/player',
-            'components/stars'
+            'components/stars',
+            'components/missileSystem',
+            'components/missile',
         ],
         message: 'Game Loaded',
         onComplete: null

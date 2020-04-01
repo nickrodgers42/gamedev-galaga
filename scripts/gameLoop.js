@@ -1,5 +1,12 @@
 class GameLoop {
-    constructor(controller, inputHandler, controlMap, gameStyle, assets) {
+    constructor(
+        controller, 
+        inputHandler, 
+        controlMap, 
+        gameStyle, 
+        assets,
+        storageController
+    ) {
         this.controller = controller
         this.inputHandler = inputHandler
         this.previousTime = performance.now()
@@ -7,12 +14,13 @@ class GameLoop {
         this.controlMap = controlMap
         this.gameStyle = gameStyle
         this.assets = assets
+        this.storageController = storageController
         this.game = null
     }
 
     runGame = () => {
         if (this.game === null) {
-            this.game = new Galaga(this.assets, this.gameStyle)
+            this.game = new Galaga(this.assets, this.gameStyle, this.getCurrentHighScore())
         }
         this.registerGameControls()
         if (this.game !== null) {
@@ -38,6 +46,13 @@ class GameLoop {
         this.controller.showScreen('game-over')
     }
 
+    getCurrentHighScore = () => {
+        const scores = this.storageController.get('scores')
+        if (scores.length == 0) {
+            return 0
+        }
+        return Math.max(...scores)
+    }
 
     registerGameControls = () => {
         if (this.game !== null) {

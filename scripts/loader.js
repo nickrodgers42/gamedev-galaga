@@ -15,7 +15,14 @@ class Game {
             this.storageController = new StorageController('gamedev-galaga')
             this.inputHandler = new InputHandler()
             this.controller = new Controller(this.screens, this.inputHandler, 'main-menu')
-            this.gameLoop = new GameLoop(this.controller, this.inputHandler, this.defaultControls, this.gameStyle, this.assets)
+            this.gameLoop = new GameLoop(
+                this.controller, 
+                this.inputHandler, 
+                this.defaultControls, 
+                this.gameStyle, 
+                this.assets,
+                this.storageController
+            )
 
             this.screens['main-menu'] = new MainMenu(this.controller, this.inputHandler)
             this.screens['controls'] = new ControlsScreen(this.controller,this.inputHandler, this.defaultControls)

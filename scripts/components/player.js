@@ -1,12 +1,17 @@
 class Player {
-    constructor(sprite) {
+    constructor(sprite, screenWidth, screenHeight) {
         this.lives = 3
-        this.coolDown = 100
+        this.screenWidth = screenWidth
+        this.screenHeight = screenHeight
+        this.position = new Point2d()
         this.sprite = sprite
     }
 
     update = (elapsedTime) => {}
-    render = (elapsedTime) => {}
+
+    render = (elapsedTime) => {
+
+    }
 
     moveLeft = (elapsedTime) => {}
     moveRight = (elapsedTime) => {}

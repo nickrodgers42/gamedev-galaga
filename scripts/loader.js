@@ -148,8 +148,21 @@ const assetsList = [
     {
         key: 'ship',
         source: '../assets/images/ship.png',
+    },
+    {
+        key: 'life',
+        source: '../assets/images/life.png'
     }
 ]
+
+const indicators = [1, 5, 10, 20, 30, 50]
+for (let i = 0; i < indicators.length; ++i) {
+    assetsList.push({
+        key: `indicator-${indicators[i]}`,
+        source: `../assets/images/indicator-${indicators[i]}.png`
+    })
+}
+
 const scriptList = [
     {
         scripts: [
@@ -182,7 +195,6 @@ const scriptList = [
             'components/particleSystem',
             'components/point2d',
             'components/random',
-            'components/ship',
             'components/player',
             'components/stars'
         ],

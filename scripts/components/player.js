@@ -12,7 +12,6 @@ class Player {
             Math.floor(this.screenHeight - sprite.height * 1.5)
         )
         this.sprite = new Sprite(sprite, this.position)
-        console.log(this.sprite)
     }
 
     update = (elapsedTime) => {}

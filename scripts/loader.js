@@ -175,6 +175,14 @@ const assetsList = [
     {
         key: 'bee',
         source: '../assets/images/bee.png'
+    },
+    {
+        key: 'theme-song',
+        source: '../assets/audio/theme-song.mp3'
+    },
+    {
+        key: 'level-start',
+        source: '../assets/audio/level-start.mp3'
     }
 ]
 
@@ -223,7 +231,12 @@ const scriptList = [
             'components/missileSystem',
             'components/missile',
             'components/sprite',
-            'components/animatedSprite'
+            'components/animatedSprite',
+            'components/bezierCurve',
+            'components/bezierPath',
+            'components/enemies/enemyPathMaker',
+            'components/enemies/enemy',
+            'components/enemies/bee',
         ],
         message: 'Game Loaded',
         onComplete: null

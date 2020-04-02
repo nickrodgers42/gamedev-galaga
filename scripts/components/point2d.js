@@ -8,6 +8,32 @@ class Point2d {
         return new Point2d(this.x, this.y)
     }
 
+    coords = () => {
+        return [this.x, this.y]
+    }
+
+    mult = (x) => {
+        const returnPoint = this.copy()
+        if (x instanceof Point2d) {
+            returnPoint.x *= x.x
+            returnPoint.y *= x.y
+        }
+        else {
+            returnPoint.x *= x
+            returnPoint.y *= x
+        }
+        return returnPoint
+    }
+
+    add = (x) => {
+        const returnPoint = this.copy()
+        if (x instanceof Point2d) {
+            returnPoint.x += x.x
+            returnPoint.y += x.y
+        }
+        return returnPoint
+    }
+
     distanceTo(x, y=0) {
         const otherPoint = new Point2d()
         if (x instanceof Point2d) {
@@ -20,7 +46,7 @@ class Point2d {
         }
         const xDist = this.x - otherPoint.x
         const yDist = this.y - otherPoint.y
-        return Math.sqrt(xDist * xDist - yDist * yDist)
+        return Math.sqrt(xDist * xDist + yDist * yDist)
     }
 
     midpointTo(x, y=0) {

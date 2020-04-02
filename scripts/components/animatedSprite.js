@@ -19,6 +19,7 @@ class AnimatedSprite extends Sprite {
 
     render = (context, rotation) => {
         context.save()
+        context.translate(this.center.x, this.center.y)
         context.rotate(rotation)
 
         context.drawImage(
@@ -27,8 +28,8 @@ class AnimatedSprite extends Sprite {
             0,
             this.subImageWidth,
             this.sprite.height,
-            Math.floor(this.center.x - this.width / 2),
-            Math.floor(this.center.y - this.height / 2),
+            Math.floor(0 - this.width / 2),
+            Math.floor(0 - this.height / 2),
             this.width,
             this.height
         )

@@ -56,7 +56,6 @@ class ControlsScreen extends Screen {
             this.updateButtons()
             this.controller.selectedButtonIndex = null
             const key = await this.inputHandler.captureNextKeyPress()
-            console.log(control, key, this.controlBeingMapped)
             this.setControl(control, key)
             this.controlBeingMapped = null
             this.updateButtons()

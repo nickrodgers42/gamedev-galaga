@@ -133,7 +133,7 @@ class Galaga {
         this.context.textAlign = 'right'
         this.context.fillText(
             scoreStr,
-            Math.floor(oneUpStrWidth * 2),
+            Math.floor(oneUpStrWidth * 2.25),
             fontSize+ 2
         )
         

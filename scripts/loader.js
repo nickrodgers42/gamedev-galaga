@@ -171,6 +171,10 @@ const assetsList = [
     {
         key: 'shoot',
         source: '../assets/audio/shoot.mp3'
+    },
+    {
+        key: 'bee',
+        source: '../assets/images/bee.png'
     }
 ]
 
@@ -218,6 +222,8 @@ const scriptList = [
             'components/stars',
             'components/missileSystem',
             'components/missile',
+            'components/sprite',
+            'components/animatedSprite'
         ],
         message: 'Game Loaded',
         onComplete: null

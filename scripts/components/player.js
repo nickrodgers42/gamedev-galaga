@@ -1,6 +1,5 @@
 class Player {
     constructor(sprite, shootSound, missileSystem, screenWidth, screenHeight) {
-        this.sprite = sprite
         this.missileSystem = missileSystem
         this.screenWidth = screenWidth
         this.screenHeight = screenHeight
@@ -10,20 +9,16 @@ class Player {
         this.maxMissilesOut = 2
         this.position = new Point2d(
             Math.floor(this.screenWidth / 2),
-            Math.floor(this.screenHeight - this.sprite.height * 1.5)
+            Math.floor(this.screenHeight - sprite.height * 1.5)
         )
+        this.sprite = new Sprite(sprite, this.position)
+        console.log(this.sprite)
     }
 
     update = (elapsedTime) => {}
 
     render = (context) => {
-        context.save()
-        context.drawImage(
-            this.sprite,
-            Math.floor(this.position.x - this.sprite.width / 2),
-            Math.floor(this.position.y - this.sprite.height / 2)
-        )
-        context.restore()
+        this.sprite.render(context)
     }
 
     moveLeft = (elapsedTime) => {

@@ -1,0 +1,38 @@
+class AnimatedSprite extends Sprite {
+    constructor(spriteSheet, center, width, height, numFrames, timing) {
+        super(spriteSheet, center, width, height)
+        this.numFrames = numFrames
+        this.timing = timing
+        this.subImageWidth = Math.floor(this.sprite.width / this.numFrames) 
+        this.currentFrame = 0
+        this.currentCount = 0
+    }
+
+    update = (elapsedTime) => {
+        this.currentCount += elapsedTime
+        while (this.currentCount >= this.timing[this.currentFrame]) {
+            this.currentCount -= this.timing[this.currentFrame]
+            this.currentFrame += 1
+            this.currentFrame %= this.numFrames
+        }
+    }
+
+    render = (context, rotation) => {
+        context.save()
+        context.rotate(rotation)
+
+        context.drawImage(
+            this.sprite,
+            this.currentFrame * this.subImageWidth,
+            0,
+            this.subImageWidth,
+            this.sprite.height,
+            Math.floor(this.center.x - this.width / 2),
+            Math.floor(this.center.y - this.height / 2),
+            this.width,
+            this.height
+        )
+
+        context.restore()
+    }
+}

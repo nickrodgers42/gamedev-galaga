@@ -24,9 +24,11 @@ class Galaga {
             5: this.assets['indicator-5'],
             1: this.assets['indicator-1']
         }
-        this.oneUpOn = true
-        this.oneUpCounterMax = 350
-        this.oneUpCounter = 0
+        this.oneUp = {
+            on: true,
+            counterMax: 350,
+            counter: 0
+        }
         this.score = 0
         this.stage = 0
         this.transitioningStage = false
@@ -97,14 +99,14 @@ class Galaga {
 
     updateOneUp = (elapsedTime) => {
         const oneUpDelta = (this.oneUpOn) ? 1 : -1
-        this.oneUpCounter += elapsedTime * oneUpDelta
-        if (this.oneUpCounter >= this.oneUpCounterMax) {
-            this.oneUpOn = false
-            this.oneUpCounter = this.oneUpCounterMax
+        this.oneUp.counter += elapsedTime * oneUpDelta
+        if (this.oneUp.counter >= this.oneUp.counterMax) {
+            this.oneUp.on = false
+            this.oneUp.counter = this.oneUp.counterMax
         }
-        else if (this.oneUpCounter <= 0) {
-            this.oneUpOn = true
-            this.oneUpCounter = 0
+        else if (this.oneUp.counter <= 0) {
+            this.oneUp.on = true
+            this.oneUp.counter = 0
         }
     }
 

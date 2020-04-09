@@ -9,13 +9,13 @@ class GameLoop {
     ) {
         this.controller = controller
         this.inputHandler = inputHandler
-        this.previousTime = performance.now()
-        requestAnimationFrame(this.gameLoop)
         this.controlMap = controlMap
         this.gameStyle = gameStyle
         this.assets = assets
         this.storageController = storageController
         this.game = null
+        this.previousTime = performance.now()
+        requestAnimationFrame(this.gameLoop)
     }
 
     runGame = () => {

@@ -238,6 +238,7 @@ const scriptList = [
             'components/enemies/enemyPathMaker',
             'components/enemies/enemy',
             'components/enemies/bee',
+            'components/enemies/enemyGrid'
         ],
         message: 'Game Loaded',
         onComplete: null

@@ -26,7 +26,6 @@ class ControlPoint {
 
 class Spline {
     constructor(controlPoints) {
-        console.log(controlPoints)
         this.controlPoints = []
         for (let i = 0; i < controlPoints.length; ++i) {
             if (controlPoints[i] instanceof ControlPoint) {

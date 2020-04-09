@@ -34,6 +34,17 @@ class Point2d {
         return returnPoint
     }
 
+    set = (x, y) => {
+        if (x instanceof Point2d) {
+            this.x = x.x
+            this.y = x.y
+        }
+        else {
+            this.x = x
+            this.y = y
+        }
+    }
+
     distanceTo = (x, y=0) => {
         const otherPoint = new Point2d()
         if (x instanceof Point2d) {

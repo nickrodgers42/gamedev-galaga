@@ -8,7 +8,6 @@ class Enemy {
         this.passedPathPoints = 0
         this.moveSpeed = 0.1
         this.path = []
-        this.rotations = []
         this._rotation = 0
         this.alive = true
     }
@@ -19,11 +18,11 @@ class Enemy {
         this.path = []
     }
 
+
     get rotation() {
-        while (this._rotation < 0) {
-            this._rotation += 2 * Math.PI
-        }
-        return this._rotation
+        let radians = this._rotation + Math.PI / 8
+        radians %= 2 * Math.PI
+        return Math.floor(radians / (Math.PI / 4)) * Math.PI / 4
     }
 
     set rotation(rotation) {
@@ -37,31 +36,35 @@ class Enemy {
         this.path = path
     }
 
+    updatePositionOnPath = (elapsedTime) => {
+        const distanceToMove = this.moveSpeed * elapsedTime
+        let distanceMoved = 0
+        while (distanceMoved < distanceToMove && this.passedPathPoints < this.path.length) {
+            const nextPoint = this.path[this.passedPathPoints]
+            const distToNextPoint = this.position.distanceTo(nextPoint)
+            if (distToNextPoint < distanceToMove - distanceMoved) {
+                this.passedPathPoints += 1
+                this.position = nextPoint.copy()
+                if (this.passedPathPoints == this.path.length) {
+                    this.resetPath()
+                    break
+                }
+            }
+            else {
+                const distanceLeft = distanceToMove - distanceMoved
+                const t = distanceLeft / distToNextPoint
+                this.position = this.position.mult(1 - t)
+                this.position = this.position.add(nextPoint.mult(t)) 
+                distanceMoved = distanceToMove
+            }
+            this.rotation = this.path[this.passedPathPoints].rotation
+        }
+    }
+
     update = (elapsedTime) => {
         this.sprite.update(elapsedTime)
         if (this.movingAlongPath) {
-            const distanceToMove = this.moveSpeed * elapsedTime
-            let distanceMoved = 0
-            while (distanceMoved < distanceToMove && this.passedPathPoints < this.path.length) {
-                const nextPoint = this.path[this.passedPathPoints]
-                const distToNextPoint = this.position.distanceTo(nextPoint)
-                if (distToNextPoint < distanceToMove - distanceMoved) {
-                    this.passedPathPoints += 1
-                    this.position = nextPoint.copy()
-                    if (this.passedPathPoints == this.path.length) {
-                        this.resetPath()
-                        break
-                    }
-                }
-                else {
-                    const distanceLeft = distanceToMove - distanceMoved
-                    const t = distanceLeft / distToNextPoint
-                    this.position = this.position.mult(1 - t)
-                    this.position = this.position.add(nextPoint.mult(t)) 
-                    distanceMoved = distanceToMove
-                }
-                this.rotation = this.position.slopeTo(nextPoint)
-            }
+            this.updatePositionOnPath(elapsedTime)
         }
         this.sprite.center = this.position
     }
@@ -83,7 +86,7 @@ class Enemy {
     }
 
     render = (context, drawPath=false) => {
-        this.sprite.render(context, 0)
+        this.sprite.render(context, this.rotation)
         if (drawPath) {
             this.renderPath(this.path, context)
         }

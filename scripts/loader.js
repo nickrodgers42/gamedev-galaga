@@ -231,14 +231,19 @@ const scriptList = [
             'components/missileSystem',
             'components/missile',
             'components/sprite',
-            'components/animatedSprite',
-            'components/bezierCurve',
-            'components/bezierPath',
+            'components/spline',
             'components/enemies/enemySystem',
             'components/enemies/enemyPathMaker',
             'components/enemies/enemy',
-            'components/enemies/bee',
             'components/enemies/enemyGrid'
+        ],
+        message: 'First set of components loaded',
+        onComplete: null
+    }, 
+    {
+        scripts: [
+            'components/animatedSprite',
+            'components/enemies/bee'
         ],
         message: 'Game Loaded',
         onComplete: null

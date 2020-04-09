@@ -1,33 +1,22 @@
 class EnemyPathMaker {
-    constructor(screenWidth, screenHeight, beeWidth) {
+    constructor(screenWidth, screenHeight, enemySize) {
         this.screenWidth = screenWidth
         this.screenHeight = screenHeight
-        this.beeWidth = beeWidth
+        this.enemySize = enemySize
+        this.screenCenter = new Point2d(this.screenWidth / 2, this.screenHeight / 2)
         this.paths = {
-            'bee-incoming-1': new BezierPath(
+            'bee-incoming-1': new Spline(
                 [
-                    new BezierCurve(
-                        new Point2d(this.screenWidth / 2 + this.beeWidth * 1.5, 0),
-                        new Point2d(this.screenWidth / 2 + this.beeWidth * 1.5, this.screenHeight / 6),
-                        new Point2d(this.beeWidth * 1.5, this.screenHeight / 6),
-                        new Point2d(this.beeWidth * 1.5, this.screenHeight / 2)
-                    ),
-                    new BezierCurve(
-                        new Point2d(this.beeWidth * 1.5, this.screenHeight / 2),
-                        new Point2d(this.beeWidth * 1.5, this.screenHeight * 0.66),
-                        new Point2d(this.screenWidth / 2 - this.beeWidth * 1.5, this.screenHeight * 0.66),
-                        new Point2d(this.screenWidth / 2 - this.beeWidth * 1.5, this.screenHeight / 2)
-                    )
-                ],
-                [
-                    10, 10
-                ],
+                    [this.screenCenter.x  + this.enemySize * 1.5, 0, 0, 100],
+                    [this.enemySize * 1.5, this.screenHeight / 2, 0, 200],
+                    [this.screenCenter.x - this.enemySize * 1.5, this.screenHeight / 2, 0, -150]
+                ]
             )
         }
         this.paths['butterfly-incoming-1'] = this.paths['bee-incoming-1'].mirrorVertically(this.screenWidth)
     }
 
-    makePath = (pathName) => {
-        return this.paths[pathName].getPath()
+    getPath = (pathName, numSamples) => {
+        return this.paths[pathName].getPath(numSamples)
     }
 }

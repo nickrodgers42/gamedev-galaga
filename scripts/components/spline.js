@@ -92,10 +92,27 @@ class Spline {
                     this.getX(...args),
                     this.getY(...args)
                 )
-                point.rotation = Math.atan(this.getYp(...args) / this.getXp(...args))
+                point.rotation = Math.atan2(this.getYp(...args), this.getXp(...args)) + Math.PI / 2
                 path.push(point)
             }
         }
         return path
+    }
+
+    mirrorVertically = (width) => {
+        const newControlPoints = []
+        const center = Math.floor(width / 2)
+        for (let i = 0; i < this.controlPoints.length; ++i) {
+            const controlPoint = this.controlPoints[i]
+            newControlPoints.push(
+                new ControlPoint(
+                    center + (center - controlPoint.x),
+                    controlPoint.y,
+                    -controlPoint.xp,
+                    controlPoint.yp
+                )
+            )
+        }
+        return new Spline(newControlPoints)
     }
 }

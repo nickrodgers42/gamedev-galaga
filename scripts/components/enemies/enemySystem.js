@@ -7,19 +7,67 @@ class EnemySystem {
         this.screenHeight = screenHeight
         this.enemies = []
         this.enemyGrid = new EnemyGrid(
-            new Point2d(0, this.enemySize * 2), 
+            new Point2d(0, this.enemySize + 2), 
             this.enemySize, 
             6, 10, 
             this.screenWidth, 
             this.screenHeight
         )
 
+        this.stageTimer = 0
+        this.stageSequencesStarted = 0
         this.enemyPathMaker = new EnemyPathMaker(this.screenWidth, this.screenHeight, enemySize)
         this.testPath = this.enemyPathMaker.getPath('bee-incoming-1', 10)
-        console.log(this.testPath)
+        this.testPath.push(this.enemyGrid.getCell(0, 0).center)
         this.gridState = 'right'
         this.gridMoveRate = 0.015
         this.testBee = new Bee(this.assets['bee'], new Point2d(), this.screenWidth, this.screenHeight)
+        this.levelEnemiesInitialized = false
+    }
+
+    makeEnemy = (enemyName) => {
+        let enemy = null
+        if (enemyName == 'bee') {
+            enemy = new Bee(this.assets['bee'], new Point2d(), this.screenWidth, this.screenHeight)
+        }
+        else if (enemyName == 'butterfly') {
+            enemy = new Butterfly(this.assets['butterfly'], new Point2d(), this.screenWidth, this.screenHeight)
+        }
+        else if (enemyName == 'boss') {
+
+        }
+        this.enemies.push(enemy)
+        return enemy
+    }
+
+    makeBee = () => this.makeEnemy('bee')
+
+    makeButterfly = () => this.makeEnemy('butterfly')
+
+    updateStageSequence = (elapsedTime) => {
+        this.stageTimer += elapsedTime
+        if (this.stageSequencesStarted == 0 && this.stageTimer > 500) {
+            this.stageSequencesStarted += 1
+            const beePath = this.enemyPathMaker.getPath('bee-incoming-1', 10)
+            const butterflyPath = this.enemyPathMaker.getPath('butterfly-incoming-1', 10)
+            const beeCells = [[4,4], [5,5], [5,4], [4,5]]
+            const butterflyCells = [[2, 4], [3, 5], [3,4], [2,5]]
+            for (let i = 0; i < beeCells.length; ++i) {
+                const bee = this.makeBee()
+                bee.moveAlongPath([
+                    new PathPoint(beePath[0].x, beePath[0].y - this.enemySize * i),
+                    ...beePath,
+                    this.enemyGrid.getCell(...beeCells[i]).center
+                ], () => this.enemyGrid.getCell(...beeCells[i]).enemy = bee)
+
+                const butterfly = this.makeButterfly()
+                butterfly.moveAlongPath([
+                    new PathPoint(butterflyPath[0].x, butterflyPath[0].y - this.enemySize * i),
+                    ...butterflyPath,
+                    this.enemyGrid.getCell(...butterflyCells[i]).center
+                ], () => this.enemyGrid.getCell(...butterflyCells[i]).enemy = butterfly)
+            }
+        }
     }
 
     updateGridPosition = (elapsedTime) => {
@@ -34,6 +82,7 @@ class EnemySystem {
     }
 
     update = (elapsedTime) => {
+        this.updateStageSequence(elapsedTime)
         for (let i = 0; i < this.enemies.length; ++i) {
             this.enemies[i].update(elapsedTime)
         }
@@ -58,7 +107,7 @@ class EnemySystem {
         // for(let i = 1; i < this.testPath.length; ++i) {
         //     context.lineTo(...this.testPath[i].coords())
         // }
-        this.testBee.render(context)
+        // this.testBee.render(context)
         context.stroke()
         context.restore()
     }

@@ -10,9 +10,14 @@ class Enemy {
         this.path = []
         this._rotation = 0
         this.alive = true
+        this.callback = null
     }
 
     resetPath = () => {
+        if (this.callback) {
+            this.callback()
+            this.callback = null
+        }
         this.movingAlongPath = false
         this.passedPathPoints = 0
         this.path = []
@@ -29,11 +34,12 @@ class Enemy {
         this._rotation = rotation
     }
 
-    moveAlongPath = (path) => {
+    moveAlongPath = (path, callback) => {
         this.position = path[0]
         this.passedPathPoints = 0
         this.movingAlongPath = true
         this.path = path
+        this.callback = callback
     }
 
     updatePositionOnPath = (elapsedTime) => {

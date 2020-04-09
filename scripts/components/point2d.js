@@ -83,3 +83,10 @@ class Point2d {
         return (x.y - this.y) / (x.x - this.x)
     }
 }
+
+class PathPoint extends Point2d {
+    constructor(x, y) {
+        super(x, y)
+        this.rotation = 0
+    }
+}

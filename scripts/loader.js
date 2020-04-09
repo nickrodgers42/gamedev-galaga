@@ -177,6 +177,10 @@ const assetsList = [
         source: '../assets/images/bee.png'
     },
     {
+        key: 'butterfly',
+        source: '../assets/images/butterfly.png'
+    },
+    {
         key: 'theme-song',
         source: '../assets/audio/theme-song.mp3'
     },
@@ -243,7 +247,8 @@ const scriptList = [
     {
         scripts: [
             'components/animatedSprite',
-            'components/enemies/bee'
+            'components/enemies/bee',
+            'components/enemies/butterfly'
         ],
         message: 'Game Loaded',
         onComplete: null

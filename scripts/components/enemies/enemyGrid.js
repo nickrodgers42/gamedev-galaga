@@ -12,7 +12,7 @@ class EnemyGridCell {
     }
 
     hasEnemy = () => {
-        return this.enemy == null
+        return this.enemy !== null
     }
 }
 
@@ -69,7 +69,7 @@ class EnemyGrid {
     }
 
     getCenter = (row, col) => {
-        return new Point2d(
+        return new PathPoint(
             this.topLeft.x + col * this.cellSize + col * this.spacing + this.cellSize / 2,
             this.topLeft.y + row * this.cellSize + row * this.spacing + this.cellSize / 2
         )
@@ -82,7 +82,11 @@ class EnemyGrid {
     update = (elapsedTime) => {
         for (let i = 0; i < this.rows; ++i) {
             for (let j = 0; j < this.cols; ++j) {
-                this.cells[i][j].center.set(...this.getCenter(i, j).coords())
+                const cell = this.cells[i][j]
+                cell.center.set(...this.getCenter(i, j).coords())
+                if (cell.hasEnemy()) {
+                    cell.enemy.position.set(cell.center)
+                }
             }
         }
     }

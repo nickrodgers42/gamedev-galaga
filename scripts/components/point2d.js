@@ -34,7 +34,7 @@ class Point2d {
         return returnPoint
     }
 
-    distanceTo(x, y=0) {
+    distanceTo = (x, y=0) => {
         const otherPoint = new Point2d()
         if (x instanceof Point2d) {
             otherPoint.x = x.x
@@ -49,7 +49,7 @@ class Point2d {
         return Math.sqrt(xDist * xDist + yDist * yDist)
     }
 
-    midpointTo(x, y=0) {
+    midpointTo = (x, y=0) => {
         const otherPoint = new Point2d()
         if (x instanceof Point2d) {
             otherPoint.x = x.x
@@ -63,5 +63,12 @@ class Point2d {
             Math.floor((this.x + otherPoint.x) / 2),
             Math.floor((this.y + otherPoint.y) / 2)
         )
+    }
+
+    slopeTo = (x) => {
+        if (!(x instanceof Point2d)) {
+            return
+        }
+        return (x.y - this.y) / (x.x - this.x)
     }
 }

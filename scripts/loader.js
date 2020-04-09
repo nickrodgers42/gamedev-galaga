@@ -234,6 +234,7 @@ const scriptList = [
             'components/animatedSprite',
             'components/bezierCurve',
             'components/bezierPath',
+            'components/enemies/enemySystem',
             'components/enemies/enemyPathMaker',
             'components/enemies/enemy',
             'components/enemies/bee',

@@ -25,10 +25,9 @@ class EnemyPathMaker {
             )
         }
         this.paths['butterfly-incoming-1'] = this.paths['bee-incoming-1'].mirrorVertically(this.screenWidth)
-
     }
 
     makePath = (pathName) => {
-        return { path: this.paths[pathName].getPath(), slope: this.paths[pathName].getSlope() }
+        return this.paths[pathName].getPath()
     }
 }

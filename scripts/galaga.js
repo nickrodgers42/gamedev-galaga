@@ -3,7 +3,6 @@ class Galaga {
         this.assets = assets
         this.gameStyle = gameStyle
         this.currentHighScore = currentHighScore
-        this.stage = 1
         this.paused = true
         this.canvas = document.getElementById('game-canvas')
         this.context = this.canvas.getContext('2d')
@@ -18,24 +17,33 @@ class Galaga {
         )
         this.stars = (this.gameStyle['Style'] == 'GameDev') ? null : new Stars(100, this.canvas.width, this.canvas.height)
         this.levelIndicators = {
-            50: assets['indicator-50'],
-            30: assets['indicator-30'],
-            20: assets['indicator-20'],
-            10: assets['indicator-10'],
-            5: assets['indicator-5'],
-            1: assets['indicator-1']
+            50: this.assets['indicator-50'],
+            30: this.assets['indicator-30'],
+            20: this.assets['indicator-20'],
+            10: this.assets['indicator-10'],
+            5: this.assets['indicator-5'],
+            1: this.assets['indicator-1']
         }
         this.oneUpOn = true
         this.oneUpCounterMax = 350
         this.oneUpCounter = 0
         this.score = 0
-        this.transitioningStage = true
-        this.assets['theme-song'].play()
+        this.stage = 0
+        this.transitioningStage = false
+        this.transitionTimer = 0
         this.audioAssets = ['theme-song', 'level-start', 'shoot']
-        this.enemyPathMaker = new EnemyPathMaker(
-            this.canvas.width, this.canvas.height, 16
-        )
-        this.testBee = new Bee(this.assets['bee'], new Point2d(), this.canvas.width, this.canvas.height)
+        this.enemySystem = new EnemySystem(this, this.assets, this.canvas.width, this.canvas.height, 16)
+        // this.testBee = new Bee(this.assets['bee'], new Point2d(), this.canvas.width, this.canvas.height)
+    }
+
+    nextStage = () => {
+        this.stage += 1
+        this.transitionTimer = 0
+        if (this.stage == 1) {
+            this.transitionTimer = this.assets['theme-song'].duration * 1000
+            this.transitioningStage = true
+            this.assets['theme-song'].play()
+        }
     }
 
     play = () => {
@@ -47,34 +55,43 @@ class Galaga {
             const audio = this.assets[this.audioAssets[i]]
             audio.currentTime = audio.duration
         }
+        this.paused = true
+    }
+
+    updateTransition = (elapsedTime) => {
+        this.transitionTimer -= elapsedTime
+        if (this.stage == 1) {
+            if (this.transitionTimer <= 2000) {
+                if (this.stars && !this.stars.moving) {
+                    this.stars.moving = true
+                }
+            }
+        }
+        if (this.transitionTimer <= 0) {
+            this.transitioningStage = false                
+        }
     }
 
     update = (elapsedTime) => {
-        if (this.gameStyle['Style'] !== 'GameDev') {
-            this.stars.update(elapsedTime)
-        }
-        if (this.transitioningStage) {
-            if (this.stage == 1) {
-                if (this.assets['theme-song'].ended) {
-                    this.transitioningStage = false
-                    if (this.stars) {
-                        this.stars.moving = true
-                    }
-                }
+        if (!this.paused) {
+            if (this.stage == 0) {
+                this.nextStage()
             }
-            else {
-                if (this.assets['level-start'].ended) {
-                    this.transitioningStage = false
-                }
+            if (this.gameStyle['Style'] !== 'GameDev') {
+                this.stars.update(elapsedTime)
             }
-        }
-        this.missileSystem.update(elapsedTime)
-        this.updateOneUp(elapsedTime)
-        this.testBee.update(elapsedTime)
-        if (!this.testBee.movingAlongPath) {
-            this.testBee.moveAlongPath(
-                this.enemyPathMaker.makePath('bee-incoming-1'),
-            )
+            if (this.transitioningStage) {
+                this.updateTransition(elapsedTime)
+            }
+            this.missileSystem.update(elapsedTime)
+            this.enemySystem.update(elapsedTime)
+            this.updateOneUp(elapsedTime)
+            // this.testBee.update(elapsedTime)
+            // if (!this.testBee.movingAlongPath) {
+            //     this.testBee.moveAlongPath(
+            //         this.enemyPathMaker.makePath('bee-incoming-1'),
+            //     )
+            // }
         }
     }
 
@@ -94,10 +111,11 @@ class Galaga {
     render = () => {
         this.drawBackground()
         this.missileSystem.render(this.context)
+        this.enemySystem.render(this.context)
         if (this.transitioningStage) {
             this.renderStageText()
         }
-        if (!this.transitioningStage && this.stage == 1) {
+        if (!(this.stage == 1 && this.transitionTimer > 1000)) {
             this.player.render(this.context)
         }
         if (this.transitioningStage && this.stage == 1) {
@@ -106,7 +124,7 @@ class Galaga {
         else {
             this.renderGameStatus()
         }
-        this.testBee.render(this.context, true)
+        // this.testBee.render(this.context, true)
     }
 
     renderStageText = () => {

@@ -24,6 +24,21 @@ class BezierPath {
         return slope
     }
 
+    getPathAndSlope = () => {
+        const path = []
+        const slope = []
+        for (let i = 0; i < this.curves.length; ++i) {
+            for (let j = 0; j <= 1; j += 1 / this.samples[i]) {
+                path.push(this.curves[i].calculateCurvePoint(j))
+                slope.push(this.curves[i].calculateSlope(j))
+            }
+        }
+        return {
+            path: path,
+            slope: slope
+        }
+    }
+
     mirrorVertically = (width) => {
         const newCurves = []
         const center = Math.floor(width / 2)

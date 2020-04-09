@@ -8,7 +8,9 @@ class Enemy {
         this.passedPathPoints = 0
         this.moveSpeed = 0.1
         this.path = []
+        this.rotations = []
         this._rotation = 0
+        this.alive = true
     }
 
     resetPath = () => {
@@ -18,25 +20,17 @@ class Enemy {
     }
 
     get rotation() {
-        let radians = this._rotation + Math.PI / 8
-        radians %= 2 * Math.PI
-        return Math.floor(radians / (Math.PI / 4)) * Math.PI / 4
+        while (this._rotation < 0) {
+            this._rotation += 2 * Math.PI
+        }
+        return this._rotation
     }
 
     set rotation(rotation) {
         this._rotation = rotation
     }
 
-    moveAlongPath = (pathSlope) => {
-        const path = pathSlope.path
-        this.slope = pathSlope.slope
-        this.slope = this.slope.map(x => {
-            x = Math.atan(x)
-            if (x < 0) {
-                x += 2 * Math.PI
-            }
-            return x
-        })
+    moveAlongPath = (path) => {
         this.position = path[0]
         this.passedPathPoints = 0
         this.movingAlongPath = true
@@ -66,7 +60,7 @@ class Enemy {
                     this.position = this.position.add(nextPoint.mult(t)) 
                     distanceMoved = distanceToMove
                 }
-                this.rotation = this.slope[this.passedPathPoints]
+                this.rotation = this.position.slopeTo(nextPoint)
             }
         }
         this.sprite.center = this.position

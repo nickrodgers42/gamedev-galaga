@@ -83,10 +83,6 @@ class EnemyGrid {
     }
 
     setEnemy = (cell, enemy) => {
-        if (enemy.sprite instanceof AnimatedSprite && enemy.sprite.numFrames == 2) {
-            enemy.sprite.currentFrame = this.frame
-            enemy.sprite.currentCount = this.frameTimer
-        }
         cell.enemy = enemy
     }
 

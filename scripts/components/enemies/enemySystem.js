@@ -52,6 +52,10 @@ class EnemySystem {
                 this.screenHeight
             )
         }
+        if (enemy && enemy.sprite instanceof AnimatedSprite && enemy.sprite.numFrames == 2) {
+            enemy.sprite.currentFrame = this.enemyGrid.frame
+            enemy.sprite.currentCount = this.enemyGrid.frameTimer
+        }
         this.enemies.push(enemy)
         return enemy
     }
@@ -61,105 +65,89 @@ class EnemySystem {
     makeButterfly = () => this.makeEnemy('butterfly')
 
     makeBoss = () => this.makeEnemy('boss')
-    
+
+    makeSequence = (cells, enemies, path, hideDirection) => {
+        for (let i = 0; i < cells.length; ++i) {
+            const cell = this.enemyGrid.getCell(...cells[i])
+            const enemy = enemies[i]
+            enemy.moveAlongPath([
+                new PathPoint(
+                    path[0].x + this.enemySize * hideDirection.x * i,
+                    path[0].y + this.enemySize * hideDirection.y * i,
+                ),
+                ...path,
+                cell.center
+            ], () => cell.enemy = enemy)
+        }
+    }
+
     updateStageSequence = (elapsedTime) => {
         this.stageTimer += elapsedTime
         if (this.stageSequencesStarted == 0 && this.stageTimer > 500) {
             this.stageTimer == 0
             this.stageSequencesStarted += 1
-            const beePath = this.enemyPathMaker.getPath('bee-incoming-1', 10)
-            const butterflyPath = this.enemyPathMaker.getPath('butterfly-incoming-1', 10)
             const beeCells = [[4,4], [5,5], [5,4], [4,5]]
             const butterflyCells = [[2, 4], [3, 5], [3,4], [2,5]]
-            for (let i = 0; i < beeCells.length; ++i) {
-                const bee = this.makeBee()
-                const beeCell = this.enemyGrid.getCell(...beeCells[i])
-                bee.moveAlongPath([
-                    new PathPoint(beePath[0].x, beePath[0].y - this.enemySize * i),
-                    ...beePath,
-                    beeCell.center
-                ], () => this.enemyGrid.setEnemy(beeCell, bee))
-
-                const butterfly = this.makeButterfly()
-                const butterflyCell = this.enemyGrid.getCell(...butterflyCells[i])
-                butterfly.moveAlongPath([
-                    new PathPoint(butterflyPath[0].x, butterflyPath[0].y - this.enemySize * i),
-                    ...butterflyPath,
-                    butterflyCell.center
-                ], () => this.enemyGrid.setEnemy(butterflyCell, butterfly))
-            }
+            this.makeSequence(
+                beeCells,
+                Array.from(Array(beeCells.length), (x, index) => x = this.makeBee()),
+                this.enemyPathMaker.getPath('bee-incoming-1', 10),
+                new Point2d(0, -1)
+            )
+            this.makeSequence(
+                butterflyCells,
+                Array.from(Array(butterflyCells.length), (x, index) => this.makeButterfly()),
+                this.enemyPathMaker.getPath('butterfly-incoming-1', 10),
+                new Point2d(0, -1)
+            )
         }
         else if (this.stageSequencesStarted == 1 && this.stageTimer > 5000) {
             this.stageTimer = 0
             this.stageSequencesStarted += 1
-            const bossPath = this.enemyPathMaker.getPath('boss-incoming-1', 10)
-            const bossCells = [[1, 3], [1,4], [1,5], [1,6]]
-            const butterflyCells = [[2, 3], [2,6], [3, 3], [3,6]]
-            for (let i = 0; i < bossCells.length + butterflyCells.length; ++i) {
-                if (i % 2 == 0) {
-                    const boss = this.makeBoss()
-                    const cell = this.enemyGrid.getCell(...bossCells[Math.floor(i / 2)])
-                    boss.moveAlongPath([
-                        new PathPoint(bossPath[0].x - this.enemySize * i, bossPath[0].y),
-                        ...bossPath,
-                        cell.center
-                    ], () => this.enemyGrid.setEnemy(cell, boss))
-                }
-                else {
-                    const butterfly = this.makeButterfly()
-                    const cell = this.enemyGrid.getCell(...butterflyCells[Math.floor(i / 2)])
-                    butterfly.moveAlongPath([
-                        new PathPoint(bossPath[0].x - this.enemySize * i, bossPath[0].y),
-                        ...bossPath,
-                        cell.center
-                    ], () => this.enemyGrid.setEnemy(cell, butterfly))
-                }
-            }
+            const bossButterflyCells = [
+                [1, 3], [2, 3], [1,4], [2,6], [1,5], [3, 3], [1,6], [3,6]
+            ]
+            this.makeSequence(
+                bossButterflyCells,
+                Array.from(Array(bossButterflyCells.length),
+                    (x, index) => (index % 2 == 0) ? this.makeBoss() : this.makeButterfly()
+                ),
+                this.enemyPathMaker.getPath('boss-incoming-1', 10),
+                new Point2d(-1, 0)
+            )
         }
         else if (this.stageSequencesStarted == 2 && this.stageTimer > 5000) {
             this.stageSequencesStarted += 1
             this.stageTimer = 0
-            const butterflyPath = this.enemyPathMaker.getPath('butterfly-incoming-2', 10)
             const butterflyCells = [[2, 1], [2,7], [2,2], [2,8], [3,1], [3,7], [3,2], [3,8]]
-            for (let i = 0; i < butterflyCells.length; ++i) {
-                const butterfly = this.makeButterfly()
-                const cell = this.enemyGrid.getCell(...butterflyCells[i])
-                butterfly.moveAlongPath([
-                    new PathPoint(butterflyPath[0].x + this.enemySize * i, butterflyPath[0].y),
-                    ...butterflyPath,
-                    cell.center
-                ], () => this.enemyGrid.setEnemy(cell, butterfly))
-            }
+            this.makeSequence(
+                butterflyCells,
+                Array.from(Array(butterflyCells.length), x => this.makeButterfly()),
+                this.enemyPathMaker.getPath('butterfly-incoming-2', 10),
+                new Point2d(1, 0)
+            )
         }
         else if (this.stageSequencesStarted == 3 && this.stageTimer > 5000) {
             this.stageSequencesStarted += 1
             this.stageTimer = 0
-            const path = this.enemyPathMaker.getPath('bee-incoming-1', 10)
             const cells = [[4, 2], [4, 6], [4,3], [4,7], [5, 2], [5,3], [5, 6], [5, 7]]
-            for (let i = 0; i < cells.length; ++i) {
-                const bee = this.makeBee()
-                const cell = this.enemyGrid.getCell(...cells[i])
-                bee.moveAlongPath([
-                    new PathPoint(path[0].x, path[0].y - this.enemySize * i),
-                    ...path,
-                    cell.center
-                ], () => this.enemyGrid.setEnemy(cell, bee))
-            }
+            this.makeSequence(
+                cells,
+                Array.from(Array(cells.length), x => this.makeBee()),
+                this.enemyPathMaker.getPath('bee-incoming-1', 10),
+                new Point2d(0, -1)
+            )
         }
         else if (this.stageSequencesStarted == 4 && this.stageTimer > 5000) {
             this.stageSequencesStarted += 1
             this.stageTimer = 0
-            const path = this.enemyPathMaker.getPath('butterfly-incoming-1', 10)
             const cells = [[4,0], [4, 1], [4, 8], [4, 9], [5, 0], [5, 1], [5, 8], [5,9]]
-            for (let i = 0; i < cells.length; ++i) {
-                const bee = this.makeBee()
-                const cell = this.enemyGrid.getCell(...cells[i])
-                bee.moveAlongPath([
-                    new PathPoint(path[0].x, path[0].y - this.enemySize * i),
-                    ...path,
-                    cell.center
-                ], () => this.enemyGrid.setEnemy(cell, bee))
-            }
+            this.makeSequence(
+                cells,
+                Array.from(Array(cells.length), x => this.makeBee()),
+                this.enemyPathMaker.getPath('butterfly-incoming-1', 10),
+                new Point2d(0, -1)
+            )
         }
     }
 
@@ -189,7 +177,7 @@ class EnemySystem {
 
     render = (context) => {
         context.save()
-        this.enemyGrid.render(context)
+        // this.enemyGrid.render(context)
         for (let i = 0; i < this.enemies.length; ++i) {
             this.enemies[i].render(context)
         }

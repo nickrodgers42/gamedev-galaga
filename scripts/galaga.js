@@ -36,12 +36,13 @@ class Galaga {
         this.audioAssets = ['theme-song', 'level-start', 'shoot']
         this.enemySystem = new EnemySystem(this, this.assets, this.canvas.width, this.canvas.height, 16)
         // this.testBee = new Bee(this.assets['bee'], new Point2d(), this.canvas.width, this.canvas.height)
+        this.playThemeSong = false
     }
 
     nextStage = () => {
         this.stage += 1
         this.transitionTimer = 0
-        if (this.stage == 1) {
+        if (this.stage == 1 && this.playThemeSong) {
             this.transitionTimer = this.assets['theme-song'].duration * 1000
             this.transitioningStage = true
             this.assets['theme-song'].play()

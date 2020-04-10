@@ -27,7 +27,10 @@ class EnemyGrid {
         this.canvasHeight = canvasHeight
         this.cells = []
         this.initCells()
-        console.log(this)
+        this.frame = 0
+        this.numFrames = 2
+        this.frameTimer = 0
+        this.frameTimerMax = 500
     }
 
     initCells = () => {
@@ -79,7 +82,21 @@ class EnemyGrid {
         return this.cells[row][col]
     }
 
+    setEnemy = (cell, enemy) => {
+        if (enemy.sprite instanceof AnimatedSprite && enemy.sprite.numFrames == 2) {
+            enemy.sprite.currentFrame = this.frame
+            enemy.sprite.currentCount = this.frameTimer
+        }
+        cell.enemy = enemy
+    }
+
     update = (elapsedTime) => {
+        this.frameTimer += elapsedTime
+        while (this.frameTimer > this.frameTimerMax) {
+            this.frameTimer -= this.frameTimerMax
+            this.frame += 1
+            this.frame %= this.numFrames
+        }
         for (let i = 0; i < this.rows; ++i) {
             for (let j = 0; j < this.cols; ++j) {
                 const cell = this.cells[i][j]

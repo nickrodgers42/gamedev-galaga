@@ -181,6 +181,14 @@ const assetsList = [
         source: '../assets/images/butterfly.png'
     },
     {
+        key: 'boss-1',
+        source: '../assets/images/boss1.png'
+    },
+    {
+        key: 'boss-2',
+        source: '../assets/images/boss2.png'
+    },
+    {
         key: 'theme-song',
         source: '../assets/audio/theme-song.mp3'
     },
@@ -248,7 +256,8 @@ const scriptList = [
         scripts: [
             'components/animatedSprite',
             'components/enemies/bee',
-            'components/enemies/butterfly'
+            'components/enemies/butterfly',
+            'components/enemies/bossGalaga'
         ],
         message: 'Game Loaded',
         onComplete: null

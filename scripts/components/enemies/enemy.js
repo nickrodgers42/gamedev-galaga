@@ -11,16 +11,17 @@ class Enemy {
         this._rotation = 0
         this.alive = true
         this.callback = null
+        this.status = 'diving'
+        this.gridCell = null
     }
 
     resetPath = () => {
-        if (this.callback) {
-            this.callback()
-            this.callback = null
-        }
         this.movingAlongPath = false
         this.passedPathPoints = 0
         this.path = []
+        if (this.callback) {
+            this.callback()
+        }
     }
 
 

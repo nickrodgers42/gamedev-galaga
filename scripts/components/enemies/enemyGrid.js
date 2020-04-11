@@ -86,6 +86,46 @@ class EnemyGrid {
         cell.enemy = enemy
     }
 
+    countNeighbors(i, j) {
+        let neighborCount = 0
+        const startCell = new Point2d(i, j)
+        const neighbors = [
+            new Point2d(0, 1),
+            new Point2d(0, -1),
+            new Point2d(1, 0),
+            new Point2d(-1, 0)
+        ]
+        if (this.cells[i][j].hasEnemy()) {
+            for (let i = 0; i < neighbors.length; ++i) {
+                const testCell = startCell.add(neighbors[i])
+                if (testCell.x >= 0 && testCell.x < this.rows) {
+                    if (testCell.y >= 0 && testCell.y < this.cols) {
+                        if (this.cells[testCell.x][testCell.y].enemy !== null) {
+                            neighborCount += 1
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            return null
+        }
+        return neighborCount
+    }
+
+    getOpenEnemies(row1, col1, row2, col2) {
+        const openEnemies = []
+        for (let i = row1; i <= row2; ++i) {
+            for (let j = col1; j <= col2; ++j) {
+                const count = this.countNeighbors(i, j)
+                if (count !== null && count <= 2) {
+                    openEnemies.push(this.cells[i][j].enemy)
+                }
+            }
+        }
+        return openEnemies
+    }
+
     update = (elapsedTime) => {
         this.frameTimer += elapsedTime
         while (this.frameTimer > this.frameTimerMax) {

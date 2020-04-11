@@ -1,3 +1,30 @@
+class EnemyTimer {
+    constructor(max, min) {
+        this.time = 0
+        this.minTime = min
+        this.maxTime = max
+        this.currentMax = Math.floor(
+            Math.random() * (this.maxTime - this.minTime) + this.minTime
+        )
+        this.ready = false
+    }
+
+    update = (elapsedTime) => {
+        this.time += elapsedTime
+        if (this.time > this.currentMax) {
+            this.ready = true
+        }
+    }
+
+    restart = () => {
+        this.time = 0
+        this.ready = false
+        this.currentMax = Math.floor(
+            Math.random() * (this.maxTime - this.minTime) + this.minTime
+        )
+    }
+}
+
 class EnemySystem {
     constructor(game, assets, screenWidth, screenHeight, enemySize) {
         this.enemySize = enemySize
@@ -14,15 +41,21 @@ class EnemySystem {
             this.screenHeight
         )
 
+        this.beeDiveTimer = new EnemyTimer(1000, 5000)
+        this.butterflyDiveTimer = new EnemyTimer(1000, 5000)
+        this.bossDiveTimer = new EnemyTimer(3000, 8000)
+        this.bossCaptureTimer = new EnemyTimer(5000, 10000)
+
         this.stageTimer = 0
         this.stageSequencesStarted = 0
+        this.stageSequenceLoaded = false
         this.enemyPathMaker = new EnemyPathMaker(this.screenWidth, this.screenHeight, enemySize)
-        this.testPath = this.enemyPathMaker.getPath('bee-incoming-1', 20)
+        this.testPath = this.enemyPathMaker.getPath('butterfly-diving-left-start', 20)
+        // this.showTestPath = true
         // this.testPath.push(this.enemyGrid.getCell(0, 0).center)
         this.gridState = 'right'
         this.gridMoveRate = 0.015
         this.testBee = new Bee(this.assets['bee'], new Point2d(), this.screenWidth, this.screenHeight)
-        this.levelEnemiesInitialized = false
     }
 
     makeEnemy = (enemyName) => {
@@ -66,7 +99,7 @@ class EnemySystem {
 
     makeBoss = () => this.makeEnemy('boss')
 
-    makeSequence = (cells, enemies, path, hideDirection) => {
+    makeSequence = (cells, enemies, path, hideDirection, status='formation') => {
         for (let i = 0; i < cells.length; ++i) {
             const cell = this.enemyGrid.getCell(...cells[i])
             const enemy = enemies[i]
@@ -77,8 +110,24 @@ class EnemySystem {
                 ),
                 ...path,
                 cell.center
-            ], () => cell.enemy = enemy)
+            ], () => {
+                cell.enemy = enemy
+                enemy.status = status
+                enemy.gridCell = new Point2d(...cells[i])
+            })
         }
+    }
+
+    enemyDive = (enemy, pathName, numSamples, callback, returnToGrid=true) => {
+        const returnCell = this.enemyGrid.getCell(...enemy.gridCell.coords())
+        returnCell.enemy = null
+        enemy.status = 'diving'
+        const path = this.enemyPathMaker.getPath(pathName, numSamples)
+        this.enemyPathMaker.shiftPath(path, enemy.position)
+        if (returnToGrid) {
+            path.push(returnCell.center)
+        }
+        enemy.moveAlongPath(path, callback)
     }
 
     updateStageSequence = (elapsedTime) => {
@@ -149,7 +198,53 @@ class EnemySystem {
                 new Point2d(0, -1)
             )
         }
+        else if (this.stageSequencesStarted == 5 && this.stageTimer > 5000) {
+            this.stageTimer = 0
+            this.stageSequencesStarted += 1
+            this.stageSequenceLoaded = true
+        }
     }
+
+    randomOpenEnemy = (row1, col1, row2, col2) => {
+        const openEnemies = this.enemyGrid.getOpenEnemies(row1, col1, row2, col2)
+        if (openEnemies.length > 0) {
+            return openEnemies[Math.floor(Math.random() * openEnemies.length)]
+        }
+        return null
+    }
+
+    updateDivingSequence = (elapsedTime) => {
+        this.beeDiveTimer.update(elapsedTime)
+        if (this.beeDiveTimer.ready) {
+            this.beeDiveTimer.restart()
+            const selectedEnemy = this.randomOpenEnemy(4, 0, 5, 9)
+            if (selectedEnemy !== null) {
+                const returnCell = this.enemyGrid.getCell(...selectedEnemy.gridCell.coords())
+                const direction = (selectedEnemy.gridCell.y < this.enemyGrid.cols / 2) ? 'left' : 'right'
+                this.enemyDive(selectedEnemy, `bee-diving-${direction}`, 10, () => {
+                    returnCell.enemy = selectedEnemy
+                    selectedEnemy.status = 'formation'
+                })
+            }
+        }
+        this.butterflyDiveTimer.update(elapsedTime)
+        if (this.butterflyDiveTimer.ready) {
+            this.butterflyDiveTimer.restart()
+            const selectedEnemy = this.randomOpenEnemy(2, 0, 3, 9)
+            if (selectedEnemy !== null) {
+                const returnCell = this.enemyGrid.getCell(...selectedEnemy.gridCell.coords())
+                const direction = (selectedEnemy.gridCell.y < this.enemyGrid.cols / 2) ? 'left' : 'right'
+                this.enemyDive(selectedEnemy, `butterfly-diving-${direction}-start`, 10, () => {
+                    selectedEnemy.position.y = 0
+                    selectedEnemy.position.x = (direction == 'left') ? this.screenWidth / 4 : (3 * this.screenWidth) / 4
+                    this.enemyDive(selectedEnemy, `butterfly-diving-${direction}-end`, 10, () => {
+                        returnCell.enemy = selectedEnemy
+                        selectedEnemy.status = 'formation'
+                    })
+                }, false)
+            }
+        }
+    }   
 
     updateGridPosition = (elapsedTime) => {
         let delta = (this.gridState == 'right') ? 1: -1
@@ -163,7 +258,12 @@ class EnemySystem {
     }
 
     update = (elapsedTime) => {
-        this.updateStageSequence(elapsedTime)
+        if (!this.stageSequenceLoaded) {
+            this.updateStageSequence(elapsedTime)
+        }
+        else {
+            this.updateDivingSequence(elapsedTime)
+        }
         for (let i = 0; i < this.enemies.length; ++i) {
             this.enemies[i].update(elapsedTime)
         }
@@ -181,13 +281,15 @@ class EnemySystem {
         for (let i = 0; i < this.enemies.length; ++i) {
             this.enemies[i].render(context)
         }
-        // context.strokeStyle='red'
-        // context.lineWidth = 2
-        // context.beginPath()
-        // context.moveTo(...this.testPath[0].coords())
-        // for(let i = 1; i < this.testPath.length; ++i) {
-        //     context.lineTo(...this.testPath[i].coords())
-        // }
+        if (this.showTestPath) {
+            context.strokeStyle='red'
+            context.lineWidth = 2
+            context.beginPath()
+            context.moveTo(...this.testPath[0].coords())
+            for(let i = 1; i < this.testPath.length; ++i) {
+                context.lineTo(...this.testPath[i].coords())
+            }
+        }
         // this.testBee.render(context)
         context.stroke()
         context.restore()

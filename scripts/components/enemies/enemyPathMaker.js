@@ -44,6 +44,42 @@ class EnemyPathMaker {
                     [this.screenCenter.x / 2, 0, 0, 0],
                     [this.screenCenter.x / 2 - this.enemySize, this.enemySize * 2.5, -50, -100]
                 ]
+            ),
+            'boss-diving-left-start': new Spline(
+                [
+                    [this.screenCenter.x / 2, this.enemySize * 2.5, 0, -50],
+                    [this.screenCenter.x / 2 + this.enemySize, this.enemySize * 2.5, 0, 50],
+                    [this.screenCenter.x / 2 + this.enemySize, this.screenCenter.y - this.enemySize * 2.5, 0, 100],
+                    [this.screenCenter.x / 2 - this.enemySize * 2, this.screenCenter.y - this.enemySize * 2.5, 0, -100],
+                    [this.screenCenter.x / 2 + this.enemySize, this.screenCenter.y - this.enemySize * 2.5, 0, 100],
+                    [0, this.screenHeight - this.enemySize * 2, 0, 200],
+                    [0, this.screenHeight, 0, 0]
+                ]
+            ),
+            'boss-diving-left-end': new Spline(
+                [
+                    [this.screenCenter.x / 2, 0, 0, 0],
+                    [this.screenCenter.x / 2 + this.enemySize, this.enemySize * 2.5, 50, -100]
+                ]
+            ),
+            'boss-capture-left-start': new Spline(
+                [
+                    [this.screenCenter.x / 2, this.enemySize * 2.5, 0, -50],
+                    [this.screenCenter.x / 2 + this.enemySize * 2, this.enemySize * 2.5, 0, 50],
+                    [this.screenCenter.x /  2 - this.enemySize, this.screenHeight / 2 + this.enemySize * 2.5, 0, 100]
+                ]
+            ),
+            'boss-capture-left-middle': new Spline(
+                [
+                    [this.screenCenter.x / 2 - this.enemySize, this.screenHeight / 2 + this.enemySize * 2.5, 0, 100],
+                    [this.screenCenter.x / 2 - this.enemySize, this.screenHeight, 0, 0]
+                ]
+            ),
+            'boss-capture-left-end': new Spline(
+                [
+                    [this.screenCenter.x / 2, 0, 0, 0],
+                    [this.screenCenter.x / 2 + this.enemySize, this.enemySize * 2.5, 50, -100]
+                ]
             )
         }
         this.paths['butterfly-incoming-1'] = this.paths['bee-incoming-1'].mirrorVertically(this.screenWidth)
@@ -51,6 +87,11 @@ class EnemyPathMaker {
         this.paths['bee-diving-right'] = this.paths['bee-diving-left'].mirrorVertically(this.screenWidth)
         this.paths['butterfly-diving-right-start'] = this.paths['butterfly-diving-left-start'].mirrorVertically(this.screenWidth)
         this.paths['butterfly-diving-right-end'] = this.paths['butterfly-diving-left-end'].mirrorVertically(this.screenWidth)
+        this.paths['boss-diving-right-start'] = this.paths['boss-diving-left-start'].mirrorVertically(this.screenWidth)
+        this.paths['boss-diving-right-end'] = this.paths['boss-diving-left-end'].mirrorVertically(this.screenWidth)
+        this.paths['boss-capture-right-start'] = this.paths['boss-capture-left-start'].mirrorVertically(this.screenWidth)
+        this.paths['boss-capture-right-middle'] = this.paths['boss-capture-left-middle'].mirrorVertically(this.screenWidth)
+        this.paths['boss-capture-right-end'] = this.paths['boss-capture-left-end'].mirrorVertically(this.screenWidth)
     }
 
     getPath = (pathName, numSamples) => {

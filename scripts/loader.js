@@ -189,6 +189,10 @@ const assetsList = [
         source: '../assets/images/boss2.png'
     },
     {
+        key: 'tractor-beam',
+        source: '../assets/images/tractor-beam.png'
+    },
+    {
         key: 'theme-song',
         source: '../assets/audio/theme-song.mp3'
     },
@@ -257,7 +261,8 @@ const scriptList = [
             'components/animatedSprite',
             'components/enemies/bee',
             'components/enemies/butterfly',
-            'components/enemies/bossGalaga'
+            'components/enemies/bossGalaga',
+            'components/enemies/tractorBeam'
         ],
         message: 'Game Loaded',
         onComplete: null

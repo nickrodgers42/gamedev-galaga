@@ -41,17 +41,19 @@ class EnemySystem {
             this.screenHeight
         )
 
-        this.beeDiveTimer = new EnemyTimer(1000, 5000)
-        this.butterflyDiveTimer = new EnemyTimer(1000, 5000)
-        this.bossDiveTimer = new EnemyTimer(3000, 8000)
-        this.bossCaptureTimer = new EnemyTimer(5000, 10000)
+        this.beeDiveTimer = new EnemyTimer(3000, 5000)
+        this.butterflyDiveTimer = new EnemyTimer(4000, 6000)
+        this.bossDiveTimer = new EnemyTimer(5000, 10000)
+        this.bossCaptureTimer = new EnemyTimer(12000, 17000)
+
+        this.tractorBeams = []
 
         this.stageTimer = 0
         this.stageSequencesStarted = 0
         this.stageSequenceLoaded = false
         this.enemyPathMaker = new EnemyPathMaker(this.screenWidth, this.screenHeight, enemySize)
-        this.testPath = this.enemyPathMaker.getPath('butterfly-diving-left-start', 20)
-        // this.showTestPath = true
+        this.testPath = this.enemyPathMaker.getPath('boss-capture-left-middle', 20)
+        this.showTestPath = false
         // this.testPath.push(this.enemyGrid.getCell(0, 0).center)
         this.gridState = 'right'
         this.gridMoveRate = 0.015
@@ -213,6 +215,38 @@ class EnemySystem {
         return null
     }
 
+    getEscorts = (boss) => {
+        if (boss.gridCell.y < this.enemyGrid.cols / 2) {
+            return this.enemyGrid.getEnemies(
+                boss.gridCell.x + 1,
+                boss.gridCell.y - 1,
+                boss.gridCell.x + 1,
+                boss.gridCell.y
+            )
+        }
+        return this.enemyGrid.getEnemies(
+            boss.gridCell.x + 1,
+            boss.gridCell.y,
+            boss.gridCell.x + 1,
+            boss.gridCell.y + 1
+        )
+    }
+
+    runTractorBeam = (boss) => {
+        this.tractorBeams.push(new TractorBeam(this.assets['tractor-beam'], boss, () => {
+            const direction = (boss.gridCell.y < this.enemyGrid.cols / 2) ?  'left' : 'right'
+            this.enemyDive(boss, `boss-capture-${direction}-middle`, 10, () => {
+                boss.position.y = 0
+                boss.position.x = (direction == 'left') ? this.screenWidth / 4 : (3 * this.screenWidth) / 4
+                this.enemyDive(boss, `boss-capture-${direction}-end`, 10, () => {
+                    const returnCell = this.enemyGrid.getCell(...boss.gridCell.coords())
+                    returnCell.enemy = boss
+                    boss.status = 'formation'
+                })
+            }, false)
+        }))
+    }
+
     updateDivingSequence = (elapsedTime) => {
         this.beeDiveTimer.update(elapsedTime)
         if (this.beeDiveTimer.ready) {
@@ -244,6 +278,50 @@ class EnemySystem {
                 }, false)
             }
         }
+        this.bossDiveTimer.update(elapsedTime)
+        if (this.bossDiveTimer.ready) {
+            this.bossDiveTimer.restart()
+            const selectedEnemy = this.randomOpenEnemy(1, 3, 1, 6)
+            if (selectedEnemy !== null) {
+                const returnCell = this.enemyGrid.getCell(...selectedEnemy.gridCell.coords())
+                const direction = (selectedEnemy.gridCell.y < this.enemyGrid.cols / 2) ? 'left' : 'right'
+                const escorts = this.getEscorts(selectedEnemy)
+                selectedEnemy.escorts = escorts
+                this.enemyDive(selectedEnemy, `boss-diving-${direction}-start`, 10, () => {
+                    selectedEnemy.position.y = - this.enemySize
+                    selectedEnemy.position.x = (direction == 'left') ? this.screenWidth / 4 : (3 * this.screenWidth) / 4
+                    this.enemyDive(selectedEnemy, `boss-diving-${direction}-end`, 10, () => {
+                        returnCell.enemy = selectedEnemy
+                        selectedEnemy.status = 'formation'
+                    })
+                }, false)
+                for (let i = 0; i < escorts.length; ++i) {
+                    const escort = escorts[i]
+                    const escortCell = this.enemyGrid.getCell(...escort.gridCell.coords())
+                    this.enemyDive(escort, `boss-diving-${direction}-start`, 10, () => {
+                        escort.position.y = 0
+                        escort.position.x = (direction == 'left') ? this.screenWidth / 4 : (3 * this.screenWidth) / 4
+                        escort.position.x += (direction == 'left') ? -this.enemySize + this.enemySize * i : this.enemySize * i 
+                        this.enemyDive(escort, `boss-diving-${direction}-end`, 10, () => {
+                            escortCell.enemy = escort
+                            escort.status = 'formation'
+                        })
+                    }, false)
+                }
+            }
+        }
+        this.bossCaptureTimer.update(elapsedTime)
+        if (this.bossCaptureTimer.ready) {
+            this.bossCaptureTimer.restart()
+            const bosses = this.enemyGrid.getEnemies(1,3, 1, 6)
+            if (bosses.length > 0) {
+                const boss = bosses[Math.floor(Math.random() * bosses.length)]
+                const direction = (boss.gridCell.y < this.enemyGrid.cols / 2) ? 'left' : 'right'
+                this.enemyDive(boss, `boss-capture-${direction}-start`, 10, () => {
+                    this.runTractorBeam(boss)
+                }, false)
+            }
+        }
     }   
 
     updateGridPosition = (elapsedTime) => {
@@ -270,6 +348,14 @@ class EnemySystem {
         if (!this.testBee.movingAlongPath) {
             this.testBee.moveAlongPath(this.testPath)
         }
+        const keepBeams = []
+        for (let i = 0; i < this.tractorBeams.length; ++i) {
+            this.tractorBeams[i].update(elapsedTime)
+            if (!this.tractorBeams[i].complete) {
+                keepBeams.push(this.tractorBeams[i])
+            }
+        }
+        this.tractorBeams = keepBeams
         this.testBee.update(elapsedTime)
         this.updateGridPosition(elapsedTime)
         this.enemyGrid.update(elapsedTime)
@@ -278,6 +364,9 @@ class EnemySystem {
     render = (context) => {
         context.save()
         // this.enemyGrid.render(context)
+        for (let i = 0; i < this.tractorBeams.length; ++i) {
+            this.tractorBeams[i].render(context)
+        }
         for (let i = 0; i < this.enemies.length; ++i) {
             this.enemies[i].render(context)
         }

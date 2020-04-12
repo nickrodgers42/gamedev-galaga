@@ -203,6 +203,14 @@ const assetsList = [
     {
         key: 'enemy-incoming',
         source: '../assets/audio/enemy-incoming.mp3'
+    },
+    {
+        key: 'ship-explode',
+        source: '../assets/images/ship-explode.png'
+    },
+    {
+        key: 'enemy-explode',
+        source: '../assets/images/enemy-explode.png'
     }
 ]
 

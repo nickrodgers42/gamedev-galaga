@@ -37,3 +37,25 @@ class AnimatedSprite extends Sprite {
         context.restore()
     }
 }
+
+class Explosion extends AnimatedSprite {
+    constructor(spriteSheet, center, width, height, numFrames, timing) {
+        super(spriteSheet, center, width, height, numFrames, timing)
+        this.complete = false
+        this.duration = timing.reduce((acc, val) => acc + val)
+        this.totalTime = 0 
+    }
+
+    update = (elapsedTime) => {
+        this.currentCount += elapsedTime
+        while (this.currentCount >= this.timing[this.currentFrame]) {
+            this.currentCount -= this.timing[this.currentFrame]
+            this.currentFrame += 1
+            this.currentFrame %= this.numFrames
+        }
+        this.totalTime += elapsedTime
+        if (this.totalTime >= this.duration) {
+            this.complete = true
+        }
+    }
+}

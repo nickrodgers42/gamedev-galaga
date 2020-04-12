@@ -13,6 +13,7 @@ class Enemy {
         this.callback = null
         this.status = 'diving'
         this.gridCell = null
+        this.hitboxRadius = 6
     }
 
     resetPath = () => {
@@ -94,6 +95,15 @@ class Enemy {
 
     render = (context, drawPath=false) => {
         this.sprite.render(context, this.rotation)
+        // context.save()
+        // context.translate(this.position.x, this.position.y)
+        // context.rotate(this.rotation)
+        // context.strokeStyle = 'red'
+        // context.lineWidth = 2
+        // context.beginPath()
+        // context.arc(0, 0,this.hitboxRadius, 0, 2 * Math.PI) 
+        // context.stroke()
+        // context.restore()
         if (drawPath) {
             this.renderPath(this.path, context)
         }

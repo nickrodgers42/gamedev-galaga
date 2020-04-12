@@ -35,8 +35,10 @@ class Galaga {
         this.transitionTimer = 0
         this.audioAssets = ['theme-song', 'level-start', 'shoot', 'enemy-incoming']
         this.enemySystem = new EnemySystem(this, this.assets, this.canvas.width, this.canvas.height, 16)
+        this.playerExplosion = null
         // this.testBee = new Bee(this.assets['bee'], new Point2d(), this.canvas.width, this.canvas.height)
         this.playThemeSong = true
+        this.renderPlayer = false
     }
 
     nextStage = () => {
@@ -69,9 +71,41 @@ class Galaga {
                     this.stars.moving = true
                 }
             }
+            if (this.transitionTimer <= 1000) {
+                this.renderPlayer = true
+            }
         }
         if (this.transitionTimer <= 0) {
             this.transitioningStage = false                
+        }
+    }
+
+    nextLife = () => {
+        this.enemySystem.stopDiving()
+    }
+
+    playerExplode = () => {
+        this.renderPlayer = false
+        this.playerExplosion = new Explosion(
+            this.assets['ship-explode'],
+            this.player.position.copy(),
+            Math.floor(this.assets['ship-explode'].width / 4),
+            this.assets['ship-explode'].height,
+            4,
+            [250, 250, 250, 250]
+        )
+    }
+
+    detectCollisions = () => {
+        for (let i = 0; i < this.enemySystem.enemies.length; ++i) {
+            const enemy = this.enemySystem.enemies[i]
+            if (this.player.position.distanceTo(enemy.position) < this.player.hitboxRadius + enemy.hitboxRadius) {
+                this.playerExplode()
+                this.player.crash()
+                this.enemySystem.crash(enemy)
+                this.nextLife()
+                break
+            }
         }
     }
 
@@ -89,6 +123,13 @@ class Galaga {
             this.missileSystem.update(elapsedTime)
             if (!this.transitioningStage) {
                 this.enemySystem.update(elapsedTime)
+            }
+            this.detectCollisions()
+            if (this.playerExplosion !== null) {
+                this.playerExplosion.update(elapsedTime)
+                if (this.playerExplosion.complete) {
+                    this.playerExplosion = null
+                }
             }
             this.updateOneUp(elapsedTime)
             // this.testBee.update(elapsedTime)
@@ -120,8 +161,11 @@ class Galaga {
         if (this.transitioningStage) {
             this.renderStageText()
         }
-        if (!(this.stage == 1 && this.transitionTimer > 1000)) {
+        if (this.renderPlayer) {
             this.player.render(this.context)
+        }
+        if (this.playerExplosion !== null) {
+            this.playerExplosion.render(this.context, 0)
         }
         if (this.transitioningStage && this.stage == 1) {
             this.renderScore()

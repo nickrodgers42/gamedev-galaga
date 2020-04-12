@@ -45,8 +45,11 @@ class EnemySystem {
         this.butterflyDiveTimer = new EnemyTimer(4000, 6000)
         this.bossDiveTimer = new EnemyTimer(5000, 10000)
         this.bossCaptureTimer = new EnemyTimer(12000, 17000)
-
+        this.diveTimers = [this.beeDiveTimer, this.butterflyDiveTimer, this.bossDiveTimer, this.bossCaptureTimer]
+        this.diving = true
+        
         this.tractorBeams = []
+        this.explosions = []
 
         this.stageTimer = 0
         this.stageSequencesStarted = 0
@@ -123,6 +126,22 @@ class EnemySystem {
                 enemy.gridCell = new Point2d(...cells[i])
             })
         }
+    }
+
+    makeExplosion = (enemy) => {
+        this.explosions.push(new Explosion(
+            this.assets['enemy-explode'],
+            enemy.position.copy(),
+            Math.floor(this.assets['enemy-explode'].width / 5),
+            this.assets['enemy-explode'].height,
+            5,
+            [200, 200, 200, 200, 200]
+        ))
+    }
+
+    crash = (enemy) => {
+        enemy.alive = false
+        this.makeExplosion(enemy)
     }
 
     enemyDive = (enemy, pathName, numSamples, callback, returnToGrid=true) => {
@@ -255,7 +274,21 @@ class EnemySystem {
         }))
     }
 
+    stopDiving = () => {
+        this.diving = false
+        for (let i = 0; i < this.diveTimers.length; ++i) {
+            this.diveTimers[i].restart()
+        }
+    }
+
+    startDiving = () => {
+        this.diving = true
+    }
+
     updateDivingSequence = (elapsedTime) => {
+        if (!this.diving) {
+            return
+        }
         this.beeDiveTimer.update(elapsedTime)
         if (this.beeDiveTimer.ready) {
             this.beeDiveTimer.restart()
@@ -350,9 +383,22 @@ class EnemySystem {
         else {
             this.updateDivingSequence(elapsedTime)
         }
+        const keepEnemies = []
         for (let i = 0; i < this.enemies.length; ++i) {
             this.enemies[i].update(elapsedTime)
+            if (this.enemies[i].alive) {
+                keepEnemies.push(this.enemies[i])
+            }
         }
+        this.enemies = keepEnemies
+        const keepExplosions = []
+        for (let i = 0; i < this.explosions.length; ++i) {
+            this.explosions[i].update(elapsedTime)
+            if (!this.explosions[i].complete) {
+                keepExplosions.push(this.explosions[i])
+            }
+        }
+        this.explosions = keepExplosions
         if (!this.testBee.movingAlongPath) {
             this.testBee.moveAlongPath(this.testPath)
         }
@@ -377,6 +423,9 @@ class EnemySystem {
         }
         for (let i = 0; i < this.enemies.length; ++i) {
             this.enemies[i].render(context)
+        }
+        for (let i = 0; i < this.explosions.length; ++i) {
+            this.explosions[i].render(context)
         }
         if (this.showTestPath) {
             context.strokeStyle='red'

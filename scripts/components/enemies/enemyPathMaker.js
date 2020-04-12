@@ -80,6 +80,22 @@ class EnemyPathMaker {
                     [this.screenCenter.x / 2, 0, 0, 0],
                     [this.screenCenter.x / 2 + this.enemySize, this.enemySize * 2.5, 50, -100]
                 ]
+            ),
+            'boss-incoming-2-outer': new Spline(
+                [
+                    [0, this.screenHeight - this.enemySize * 1.5, 0, 20],
+                    [this.screenCenter.x - this.enemySize * 0.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, -200],
+                    [this.enemySize * 0.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, 200],
+                    [this.screenCenter.x - this.enemySize * 0.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, -200],
+                ]
+            ),
+            'boss-incoming-2-inner': new Spline(
+                [
+                    [0, this.screenHeight - this.enemySize * 2.5, 0, 20],
+                    [this.screenCenter.x - this.enemySize * 1.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, -128],
+                    [this.enemySize * 1.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, 128],
+                    [this.screenCenter.x - this.enemySize * 1.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, -128],
+                ]
             )
         }
         this.paths['butterfly-incoming-1'] = this.paths['bee-incoming-1'].mirrorVertically(this.screenWidth)

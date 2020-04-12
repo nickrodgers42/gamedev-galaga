@@ -42,23 +42,30 @@ class Galaga {
             'shoot', 
             'enemy-incoming', 
             'enemy-kill',
-            'enemy-hit'
+            'enemy-hit',
+            'level-start'
         ]
-        this.assets['enemy-hit'].volume = 0.5
+        this.assets['enemy-hit'].volume = 0.3
+        this.assets['level-start'].volume = 0.3
         this.enemySystem = new EnemySystem(this, this.assets, this.canvas.width, this.canvas.height, 16)
         this.playerExplosion = null
-        // this.testBee = new Bee(this.assets['bee'], new Point2d(), this.canvas.width, this.canvas.height)
         this.playThemeSong = true
         this.renderPlayer = false
     }
 
     nextStage = () => {
         this.stage += 1
+        console.log(this.stage)
         this.transitionTimer = 0
         if (this.stage == 1 && this.playThemeSong) {
             this.transitionTimer = this.assets['theme-song'].duration * 1000
             this.transitioningStage = true
             this.assets['theme-song'].play()
+        }
+        else {
+            this.transitionTimer = this.assets['level-start'].duration * 1000 + 1000
+            this.transitioningStage = true
+            this.assets['level-start'].play()
         }
     }
 
@@ -87,7 +94,8 @@ class Galaga {
             }
         }
         if (this.transitionTimer <= 0) {
-            this.transitioningStage = false                
+            this.transitioningStage = false
+            this.enemySystem.nextStage()
         }
     }
 
@@ -97,7 +105,7 @@ class Galaga {
             this.stars.moving = false
         }
         this.lostLife = true
-        this.lifeTransitionTimer = 3000
+        this.lifeTransitionTimer = 5000
     }
 
     playerExplode = () => {
@@ -126,6 +134,7 @@ class Galaga {
                 const missile = this.missileSystem.playerMissiles[j]
                 if (missile.position.distanceTo(enemy.position) < missile.hitboxRadius + enemy.hitboxRadius) {
                     this.enemySystem.hit(enemy)
+                    this.missileSystem.shotsHit += 1
                     missile.detonated = true
                 }
             }
@@ -164,6 +173,9 @@ class Galaga {
             if (this.lostLife) {
                 this.updateLifeTransitionTimer(elapsedTime)
             }
+            else if (this.enemySystem.stageSequenceLoaded && this.enemySystem.enemies.length == 0) {
+                console.log('level cleared')
+            }
             this.detectCollisions()
             if (this.playerExplosion !== null) {
                 this.playerExplosion.update(elapsedTime)
@@ -172,12 +184,6 @@ class Galaga {
                 }
             }
             this.updateOneUp(elapsedTime)
-            // this.testBee.update(elapsedTime)
-            // if (!this.testBee.movingAlongPath) {
-            //     this.testBee.moveAlongPath(
-            //         this.enemyPathMaker.makePath('bee-incoming-1'),
-            //     )
-            // }
         }
     }
 
@@ -216,7 +222,6 @@ class Galaga {
         else {
             this.renderGameStatus()
         }
-        // this.testBee.render(this.context, true)
     }
 
     renderReadyText = () => {

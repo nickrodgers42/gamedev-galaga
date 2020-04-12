@@ -12,6 +12,7 @@ class BossGalaga extends Enemy {
         this.spriteSheet1 = spriteSheet1
         this.spriteSheet2 = spriteSheet2
         this.hasBeenHit = false
+        this.escorts = []
     }
 
     hit = () => {

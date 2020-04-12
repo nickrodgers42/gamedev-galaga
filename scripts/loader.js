@@ -199,6 +199,10 @@ const assetsList = [
     {
         key: 'level-start',
         source: '../assets/audio/level-start.mp3'
+    },
+    {
+        key: 'enemy-incoming',
+        source: '../assets/audio/enemy-incoming.mp3'
     }
 ]
 

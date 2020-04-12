@@ -33,10 +33,10 @@ class Galaga {
         this.stage = 0
         this.transitioningStage = false
         this.transitionTimer = 0
-        this.audioAssets = ['theme-song', 'level-start', 'shoot']
+        this.audioAssets = ['theme-song', 'level-start', 'shoot', 'enemy-incoming']
         this.enemySystem = new EnemySystem(this, this.assets, this.canvas.width, this.canvas.height, 16)
         // this.testBee = new Bee(this.assets['bee'], new Point2d(), this.canvas.width, this.canvas.height)
-        this.playThemeSong = false
+        this.playThemeSong = true
     }
 
     nextStage = () => {
@@ -87,7 +87,9 @@ class Galaga {
                 this.updateTransition(elapsedTime)
             }
             this.missileSystem.update(elapsedTime)
-            this.enemySystem.update(elapsedTime)
+            if (!this.transitioningStage) {
+                this.enemySystem.update(elapsedTime)
+            }
             this.updateOneUp(elapsedTime)
             // this.testBee.update(elapsedTime)
             // if (!this.testBee.movingAlongPath) {
@@ -99,7 +101,7 @@ class Galaga {
     }
 
     updateOneUp = (elapsedTime) => {
-        const oneUpDelta = (this.oneUpOn) ? 1 : -1
+        const oneUpDelta = (this.oneUp.on) ? 1 : -1
         this.oneUp.counter += elapsedTime * oneUpDelta
         if (this.oneUp.counter >= this.oneUp.counterMax) {
             this.oneUp.on = false
@@ -200,7 +202,7 @@ class Galaga {
         const oneUpStr = '1UP'
         const oneUpStrWidth = this.context.measureText(oneUpStr).width
         const highScoreStr = 'HIGH SCORE'
-        if (this.oneUpOn) {
+        if (this.oneUp.on) {
             this.context.fillText(oneUpStr, oneUpStrWidth, 1)
         }
 

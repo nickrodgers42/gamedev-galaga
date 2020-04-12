@@ -60,6 +60,11 @@ class EnemySystem {
         this.testBee = new Bee(this.assets['bee'], new Point2d(), this.screenWidth, this.screenHeight)
     }
 
+    playDiveSound = () => {
+        this.assets['enemy-incoming'].currentTime = 0
+        this.assets['enemy-incoming'].play()
+    }
+
     makeEnemy = (enemyName) => {
         let enemy = null
         if (enemyName == 'bee') {
@@ -123,6 +128,9 @@ class EnemySystem {
     enemyDive = (enemy, pathName, numSamples, callback, returnToGrid=true) => {
         const returnCell = this.enemyGrid.getCell(...enemy.gridCell.coords())
         returnCell.enemy = null
+        if (enemy.status !== 'diving') {
+            this.playDiveSound()
+        }
         enemy.status = 'diving'
         const path = this.enemyPathMaker.getPath(pathName, numSamples)
         this.enemyPathMaker.shiftPath(path, enemy.position)

@@ -25,7 +25,7 @@ class MissileSystem {
         const keepMissiles = []
         for (let i = 0; i < missiles.length; ++i) {
             missiles[i].update(elapsedTime)
-            if (missiles[i].onScreen) {
+            if (missiles[i].onScreen && !missiles[i].detonated) {
                 keepMissiles.push(missiles[i])
             }
         }

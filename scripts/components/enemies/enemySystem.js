@@ -129,19 +129,38 @@ class EnemySystem {
     }
 
     makeExplosion = (enemy) => {
+        this.assets['enemy-kill'].currentTime = 0
+        this.assets['enemy-kill'].play()
         this.explosions.push(new Explosion(
             this.assets['enemy-explode'],
             enemy.position.copy(),
             Math.floor(this.assets['enemy-explode'].width / 5),
             this.assets['enemy-explode'].height,
             5,
-            [200, 200, 200, 200, 200]
+            [100, 100, 100, 100, 100]
         ))
     }
 
     crash = (enemy) => {
         enemy.alive = false
         this.makeExplosion(enemy)
+        if (enemy.gridCell !== null) {
+            this.enemyGrid.getCell(...enemy.gridCell.coords()).enemy = null
+        }
+    }
+
+    hit = (enemy) => {
+        enemy.hit()
+        if (!enemy.alive) {
+            this.makeExplosion(enemy)
+            if (enemy.gridCell !== null) {
+                this.enemyGrid.getCell(...enemy.gridCell.coords()).enemy = null
+            }
+        }
+        else {
+            this.assets['enemy-hit'].currentTime = 0
+            this.assets['enemy-hit'].play()
+        }
     }
 
     enemyDive = (enemy, pathName, numSamples, callback, returnToGrid=true) => {
@@ -208,7 +227,7 @@ class EnemySystem {
         else if (this.stageSequencesStarted == 3 && this.stageTimer > 5000) {
             this.stageSequencesStarted += 1
             this.stageTimer = 0
-            const cells = [[4, 2], [4, 6], [4,3], [4,7], [5, 2], [5,3], [5, 6], [5, 7]]
+            const cells = [[4, 2], [4, 6], [4,3], [4,7], [5, 2], [5,6], [5, 3], [5, 7]]
             this.makeSequence(
                 cells,
                 Array.from(Array(cells.length), x => this.makeBee()),
@@ -219,7 +238,7 @@ class EnemySystem {
         else if (this.stageSequencesStarted == 4 && this.stageTimer > 5000) {
             this.stageSequencesStarted += 1
             this.stageTimer = 0
-            const cells = [[4,0], [4, 1], [4, 8], [4, 9], [5, 0], [5, 1], [5, 8], [5,9]]
+            const cells = [[4, 0], [4, 8], [4, 1], [4, 9], [5, 0], [5, 8], [5, 1], [5, 9]]
             this.makeSequence(
                 cells,
                 Array.from(Array(cells.length), x => this.makeBee()),

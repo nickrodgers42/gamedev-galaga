@@ -11,6 +11,26 @@ class BossGalaga extends Enemy {
         super(sprite, position, screenWidth, screenHeight)
         this.spriteSheet1 = spriteSheet1
         this.spriteSheet2 = spriteSheet2
-        this.hit = false
+        this.hasBeenHit = false
+    }
+
+    hit = () => {
+        if (!this.hasBeenHit) {
+            this.hasBeenHit = true
+            const secondSprite = new AnimatedSprite(
+                this.spriteSheet2,
+                this.position,
+                Math.floor(this.spriteSheet2.width / 2),
+                this.spriteSheet2.height,
+                2,
+                [500, 500]
+            )
+            secondSprite.currentFrame = this.sprite.currentFrame
+            secondSprite.currentCount = this.sprite.currentCount
+            this.sprite = secondSprite
+        }
+        else {
+            this.alive = false
+        }
     }
 }

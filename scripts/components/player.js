@@ -20,7 +20,8 @@ class Player {
 
 
     crash = () => {
-        this.position.x = this.screenWidth / 2
+        this.position.x = Math.floor(this.screenWidth / 2)
+        this.lives -= 1
     }
 
     render = (context) => {

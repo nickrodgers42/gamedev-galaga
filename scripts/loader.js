@@ -211,6 +211,14 @@ const assetsList = [
     {
         key: 'enemy-explode',
         source: '../assets/images/enemy-explode.png'
+    },
+    {
+        key: 'enemy-kill',
+        source: '../assets/audio/enemy-kill.mp3'
+    },
+    {
+        key: 'enemy-hit',
+        source: '../assets/audio/enemy-hit.mp3'
     }
 ]
 

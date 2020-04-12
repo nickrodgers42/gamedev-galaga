@@ -44,6 +44,10 @@ class Enemy {
         this.callback = callback
     }
 
+    hit = () => {
+        this.alive = false
+    }
+
     updatePositionOnPath = (elapsedTime) => {
         const distanceToMove = this.moveSpeed * elapsedTime
         let distanceMoved = 0

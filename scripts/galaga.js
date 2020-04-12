@@ -33,7 +33,18 @@ class Galaga {
         this.stage = 0
         this.transitioningStage = false
         this.transitionTimer = 0
-        this.audioAssets = ['theme-song', 'level-start', 'shoot', 'enemy-incoming']
+        this.lostLife = false
+        this.lifeTransitionTimer = 0
+
+        this.audioAssets = [
+            'theme-song', 
+            'level-start', 
+            'shoot', 
+            'enemy-incoming', 
+            'enemy-kill',
+            'enemy-hit'
+        ]
+        this.assets['enemy-hit'].volume = 0.5
         this.enemySystem = new EnemySystem(this, this.assets, this.canvas.width, this.canvas.height, 16)
         this.playerExplosion = null
         // this.testBee = new Bee(this.assets['bee'], new Point2d(), this.canvas.width, this.canvas.height)
@@ -82,6 +93,11 @@ class Galaga {
 
     nextLife = () => {
         this.enemySystem.stopDiving()
+        if (this.stars !== null) {
+            this.stars.moving = false
+        }
+        this.lostLife = true
+        this.lifeTransitionTimer = 3000
     }
 
     playerExplode = () => {
@@ -106,6 +122,27 @@ class Galaga {
                 this.nextLife()
                 break
             }
+            for (let j = 0; j < this.missileSystem.playerMissiles.length; ++j) {
+                const missile = this.missileSystem.playerMissiles[j]
+                if (missile.position.distanceTo(enemy.position) < missile.hitboxRadius + enemy.hitboxRadius) {
+                    this.enemySystem.hit(enemy)
+                    missile.detonated = true
+                }
+            }
+        }
+    }
+
+    updateLifeTransitionTimer = (elapsedTime) => {
+        this.lifeTransitionTimer -= elapsedTime
+        if (this.lifeTransitionTimer <= 1000) {
+            this.renderPlayer = true
+            if (this.stars !== null) {
+                this.stars.moving = true
+            }
+        } 
+        if (this.lifeTransitionTimer <= 0) {
+            this.lostLife = false
+            this.enemySystem.startDiving()
         }
     }
 
@@ -123,6 +160,9 @@ class Galaga {
             this.missileSystem.update(elapsedTime)
             if (!this.transitioningStage) {
                 this.enemySystem.update(elapsedTime)
+            }
+            if (this.lostLife) {
+                this.updateLifeTransitionTimer(elapsedTime)
             }
             this.detectCollisions()
             if (this.playerExplosion !== null) {
@@ -164,6 +204,9 @@ class Galaga {
         if (this.renderPlayer) {
             this.player.render(this.context)
         }
+        if (this.lostLife && this.lifeTransitionTimer <= 2000) {
+            this.renderReadyText()
+        }
         if (this.playerExplosion !== null) {
             this.playerExplosion.render(this.context, 0)
         }
@@ -174,6 +217,24 @@ class Galaga {
             this.renderGameStatus()
         }
         // this.testBee.render(this.context, true)
+    }
+
+    renderReadyText = () => {
+        this.context.save()
+        this.context.fillStyle = '#00FFFF'
+        this.context.strokeStyle = '#00FFFF'
+        const fontSize = 8
+        const fontStr = `${fontSize}px "${this.gameFont}"`
+        this.context.font = document.fonts.check(fontStr) ? fontStr : `${fontStr}px monsopace`
+        this.context.textBaseline = 'top'
+        this.context.textBaseline = 'left'
+        const readyStr = 'READY'
+        this.context.fillText(
+            readyStr,
+            Math.floor(this.canvas.width / 2 - this.context.measureText(readyStr).width / 2),
+            Math.floor(this.canvas.height / 2) - fontSize
+        )
+        this.context.restore()
     }
 
     renderStageText = () => {
@@ -315,7 +376,7 @@ class Galaga {
     }
 
     playerFire = (elapsedTime) => {
-        if (!this.transitioningStage) {
+        if (!this.transitioningStage && !this.lostLife) {
             this.player.fire()
         }
     }

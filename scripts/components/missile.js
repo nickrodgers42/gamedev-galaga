@@ -4,6 +4,8 @@ class Missile {
         this.sprite = new Sprite(sprite, this.position)
         this.moveRate = 0.2
         this.onScreen = true
+        this.hitboxRadius = 2
+        this.detonated = false
     }
     
     update = (elapsedTime) => {

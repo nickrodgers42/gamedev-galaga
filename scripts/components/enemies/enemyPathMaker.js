@@ -83,18 +83,68 @@ class EnemyPathMaker {
             ),
             'boss-incoming-2-outer': new Spline(
                 [
-                    [0, this.screenHeight - this.enemySize * 1.5, 0, 20],
-                    [this.screenCenter.x - this.enemySize * 0.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, -200],
-                    [this.enemySize * 0.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, 200],
-                    [this.screenCenter.x - this.enemySize * 0.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, -200],
-                ]
-            ),
-            'boss-incoming-2-inner': new Spline(
-                [
                     [0, this.screenHeight - this.enemySize * 2.5, 0, 20],
                     [this.screenCenter.x - this.enemySize * 1.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, -128],
                     [this.enemySize * 1.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, 128],
                     [this.screenCenter.x - this.enemySize * 1.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, -128],
+                ]
+            ),
+            'boss-incoming-2-inner': new Spline(
+                [
+                    [0, this.screenHeight - this.enemySize * 3.5, 0, 20],
+                    [this.screenCenter.x - this.enemySize * 2.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, -64],
+                    [this.enemySize * 2.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, 64],
+                    [this.screenCenter.x - this.enemySize * 2.5, this.screenHeight / 2 + this.enemySize * 1.5, 0, -64],
+                ]
+            ),
+            'bee-incoming-2-outer': new Spline(
+                [
+                    [this.screenCenter.x + this.enemySize * 1.5, 0, 0, 100],
+                    [this.enemySize * 1.5, this.screenHeight / 2, 0, 200],
+                    [this.screenCenter.x - this.enemySize * 1.5, this.screenHeight / 2, 0, -150]
+                ]
+            ),
+            'bee-incoming-2-inner': new Spline(
+                [
+                    [this.screenCenter.x + this.enemySize * 2.5, 0, 0, 100],
+                    [this.enemySize * 2.5, this.screenHeight / 2, 0, 100],
+                    [this.screenCenter.x - this.enemySize * 2.5, this.screenHeight / 2, 0, -100]
+                ]
+            ),
+            'bee-diving-left-loop-start': new Spline (
+                [
+                    [this.enemySize, this.screenHeight / 2 - this.enemySize * 2, 0, -50],
+                    [0, this.screenHeight / 2 - this.enemySize * 2, 0, 50],
+                    [this.screenCenter.x + this.enemySize * 1.5, this.screenCenter.y + this.enemySize, 0, 100],
+                    [this.screenCenter.x + this.enemySize * 1.5, this.screenHeight - this.enemySize * 4, 0, 250],
+                    [this.enemySize, this.screenHeight - this.enemySize * 4, 0, -250],
+                    [this.screenCenter.x + this.enemySize * 1.5, this.screenHeight - this.enemySize * 4, 0, 250],
+                    [this.screenCenter.x + this.enemySize * 1.5, this.screenHeight, 0, 0]
+                ]
+            ),
+            'bee-diving-left-loop-end': new Spline(
+                [
+                    [this.screenCenter.x / 2, 0, 0, 0],
+                    [this.screenCenter.x / 2 - this.enemySize, this.enemySize * 2.5, -50, -100]
+                ]
+            ),
+            'bee-incoming-challenge-left': new Spline(
+                [
+                    [this.screenCenter.x  + this.enemySize * 1.5, 0, 0, 500],
+                    [this.screenCenter.x - this.enemySize * 1.5, this.screenHeight - this.enemySize * 5.5, -60, 100],
+                    [this.enemySize * 1.5, this.screenHeight - this.enemySize * 5.5, 0, -100],
+                    [this.screenWidth, this.screenCenter.y - this.enemySize * 0.5, 0, 100]
+                ]
+            ),
+            'boss-incoming-challenge-left': new Spline(
+                [
+                    [0, this.screenHeight - this.enemySize * 2.5, -50, 50], 
+                    [this.screenCenter.x + this.enemySize * 4.5, this.screenCenter.y + this.enemySize * 0.5, 0, -100],
+                    [this.screenCenter.x + this.enemySize * 4.5, this.screenCenter.y - this.enemySize * 3.5, 0, -100],
+                    [this.screenCenter.x + this.enemySize * 2.5, this.screenCenter.y - this.enemySize * 3.5, 0, 100],
+                    [this.screenCenter.x + this.enemySize * 2.5, this.screenCenter.y + this.enemySize * 0.5, 0, 100],
+                    [this.screenCenter.x + this.enemySize * 4.5, this.screenCenter.y + this.enemySize * 0.5, 50, -100],
+                    [this.screenWidth, this.screenCenter.y - this.enemySize * 3.5, -100, 100]
                 ]
             )
         }
@@ -108,6 +158,14 @@ class EnemyPathMaker {
         this.paths['boss-capture-right-start'] = this.paths['boss-capture-left-start'].mirrorVertically(this.screenWidth)
         this.paths['boss-capture-right-middle'] = this.paths['boss-capture-left-middle'].mirrorVertically(this.screenWidth)
         this.paths['boss-capture-right-end'] = this.paths['boss-capture-left-end'].mirrorVertically(this.screenWidth)
+        this.paths['butterfly-incoming-3-outer'] = this.paths['boss-incoming-2-outer'].mirrorVertically(this.screenWidth)
+        this.paths['butterfly-incoming-3-inner'] = this.paths['boss-incoming-2-inner'].mirrorVertically(this.screenWidth)
+        this.paths['bee-incoming-3-outer'] = this.paths['bee-incoming-2-outer'].mirrorVertically(this.screenWidth)
+        this.paths['bee-incoming-3-inner'] = this.paths['bee-incoming-2-inner'].mirrorVertically(this.screenWidth)
+        this.paths['bee-diving-right-loop-start'] = this.paths['bee-diving-left-loop-start'].mirrorVertically(this.screenWidth)
+        this.paths['bee-diving-right-loop-end'] = this.paths['bee-diving-left-loop-end'].mirrorVertically(this.screenWidth)
+        this.paths['bee-incoming-challenge-right'] = this.paths['bee-incoming-challenge-left'].mirrorVertically(this.screenWidth)
+        this.paths['boss-incoming-challenge-right'] = this.paths['boss-incoming-challenge-left'].mirrorVertically(this.screenWidth)
     }
 
     getPath = (pathName, numSamples) => {

@@ -98,6 +98,9 @@ class Enemy {
     }
 
     render = (context, drawPath=false) => {
+        if (!(this.sprite instanceof AnimatedSprite)) {
+            this.sprite.center = this.position
+        }
         this.sprite.render(context, this.rotation)
         // context.save()
         // context.translate(this.position.x, this.position.y)

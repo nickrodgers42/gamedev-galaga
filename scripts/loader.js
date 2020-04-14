@@ -223,6 +223,22 @@ const assetsList = [
     {
         key: 'level-start',
         source: '../assets/audio/level-start.mp3'
+    },
+    {
+        key: 'momiji',
+        source: '../assets/images/momiji.png'
+    },
+    {
+        key: 'tonbo',
+        source: '../assets/images/tonbo.png'
+    },
+    {
+        key: 'enterprise',
+        source: '../assets/images/enterprise.png'
+    },
+    {
+        key: 'enemy-missile',
+        source: '../assets/images/enemy-missile.png'
     }
 ]
 
@@ -268,8 +284,8 @@ const scriptList = [
             'components/random',
             'components/player',
             'components/stars',
-            'components/missileSystem',
             'components/missile',
+            'components/missileSystem',
             'components/sprite',
             'components/spline',
             'components/enemies/enemySystem',
@@ -286,6 +302,7 @@ const scriptList = [
             'components/enemies/bee',
             'components/enemies/butterfly',
             'components/enemies/bossGalaga',
+            'components/enemies/bonus',
             'components/enemies/tractorBeam'
         ],
         message: 'Game Loaded',

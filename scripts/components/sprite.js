@@ -18,12 +18,13 @@ class Sprite {
 
     render = (context, rotation=0) => {
         context.save()
+        context.translate(this.center.x, this.center.y)
         context.rotate(rotation)
         
         context.drawImage(
             this.sprite,
-            Math.floor(this.center.x - this.width / 2),
-            Math.floor(this.center.y - this.height / 2)
+            Math.floor(0 - this.width / 2),
+            Math.floor(0 - this.height / 2)
         )
 
         context.restore()

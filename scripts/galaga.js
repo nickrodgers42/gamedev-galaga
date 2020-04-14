@@ -55,7 +55,6 @@ class Galaga {
 
     nextStage = () => {
         this.stage += 1
-        console.log(this.stage)
         this.transitionTimer = 0
         if (this.stage == 1 && this.playThemeSong) {
             this.transitionTimer = this.assets['theme-song'].duration * 1000
@@ -67,6 +66,7 @@ class Galaga {
             this.transitioningStage = true
             this.assets['level-start'].play()
         }
+        this.enemySystem.nextStage()
     }
 
     play = () => {
@@ -94,8 +94,11 @@ class Galaga {
             }
         }
         if (this.transitionTimer <= 0) {
+            if (this.stars !== null && !this.stars.moving) {
+                this.stars.moving = true
+            }
+            this.renderPlayer = true
             this.transitioningStage = false
-            this.enemySystem.nextStage()
         }
     }
 
@@ -123,7 +126,7 @@ class Galaga {
     detectCollisions = () => {
         for (let i = 0; i < this.enemySystem.enemies.length; ++i) {
             const enemy = this.enemySystem.enemies[i]
-            if (this.player.position.distanceTo(enemy.position) < this.player.hitboxRadius + enemy.hitboxRadius) {
+            if (this.player.position.distanceTo(enemy.position) < this.player.hitboxRadius + enemy.hitboxRadius && !this.lostLife) {
                 this.playerExplode()
                 this.player.crash()
                 this.enemySystem.crash(enemy)
@@ -135,6 +138,15 @@ class Galaga {
                 if (missile.position.distanceTo(enemy.position) < missile.hitboxRadius + enemy.hitboxRadius) {
                     this.enemySystem.hit(enemy)
                     this.missileSystem.shotsHit += 1
+                    missile.detonated = true
+                }
+            }
+            for (let j = 0; j < this.missileSystem.enemyMissiles.length; ++j) {
+                const missile = this.missileSystem.enemyMissiles[j]
+                if (missile.position.distanceTo(this.player.position) < missile.hitboxRadius + this.player.hitboxRadius) {
+                    this.playerExplode()
+                    this.player.crash()
+                    this.nextLife()
                     missile.detonated = true
                 }
             }
@@ -157,24 +169,19 @@ class Galaga {
 
     update = (elapsedTime) => {
         if (!this.paused) {
-            if (this.stage == 0) {
+            if (this.enemySystem.stageComplete) {
                 this.nextStage()
             }
-            if (this.gameStyle['Style'] !== 'GameDev') {
+            if (this.stars !== null) {
                 this.stars.update(elapsedTime)
             }
             if (this.transitioningStage) {
                 this.updateTransition(elapsedTime)
             }
             this.missileSystem.update(elapsedTime)
-            if (!this.transitioningStage) {
-                this.enemySystem.update(elapsedTime)
-            }
+            this.enemySystem.update(elapsedTime)
             if (this.lostLife) {
                 this.updateLifeTransitionTimer(elapsedTime)
-            }
-            else if (this.enemySystem.stageSequenceLoaded && this.enemySystem.enemies.length == 0) {
-                console.log('level cleared')
             }
             this.detectCollisions()
             if (this.playerExplosion !== null) {
@@ -259,7 +266,10 @@ class Galaga {
                 Math.floor(this.canvas.height / 2) - fontSize
             )
         }
-        const stageStr = `STAGE ${this.stage}`
+        let stageStr = `STAGE ${this.stage}`
+        if (this.stage % 3 == 0) {
+            stageStr = `CHALLENGING STAGE`
+        }
         this.context.fillText(
             stageStr,
             Math.floor(this.canvas.width / 2 - this.context.measureText(stageStr).width / 2),
@@ -354,7 +364,7 @@ class Galaga {
         const y = this.canvas.height - this.levelIndicators[1].height - 2
         let remainingLevels = this.stage
         while (remainingLevels > 0) {
-            for (const indicator in this.levelIndicators) {
+            for (const indicator of Object.keys(this.levelIndicators).reverse()) {
                 if (remainingLevels - indicator >= 0) {
                     markersNeeded.push(indicator)
                     x -= this.levelIndicators[indicator].width

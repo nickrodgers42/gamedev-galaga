@@ -25,11 +25,34 @@ class EnemyTimer {
     }
 }
 
+class MissileTimer extends EnemyTimer {
+    constructor(enemy, duration, delay=0, maxShots=2) {
+        super(duration, duration)
+        this.currentMax = duration + delay
+        this.delay = delay
+        this.enemy = enemy
+        this.shotsFired = 0
+        this.maxShots = maxShots
+        this.alive = true
+    }
+    
+    restart = () => {
+        this.time = 0
+        this.shotsFired += 1
+        this.ready = false
+        this.currentMax = this.maxTime
+        if (this.shotsFired >= this.maxShots) {
+            this.alive = false
+        }
+    }
+}
+
 class EnemySystem {
     constructor(game, assets, screenWidth, screenHeight, enemySize) {
         this.enemySize = enemySize
         this.game = game
-        this.stage = 0
+        this.missileSystem = this.game.missileSystem
+        this.stage = this.game.stage
         this.assets = assets
         this.screenWidth = screenWidth
         this.screenHeight = screenHeight
@@ -42,27 +65,32 @@ class EnemySystem {
             this.screenHeight
         )
 
-        this.beeDiveTimer = new EnemyTimer(3000, 5000)
-        this.butterflyDiveTimer = new EnemyTimer(4000, 6000)
-        this.bossDiveTimer = new EnemyTimer(5000, 10000)
+        this.beeDiveTimer = new EnemyTimer(4000, 6000)
+        this.butterflyDiveTimer = new EnemyTimer(5000, 8000)
+        this.bossDiveTimer = new EnemyTimer(6000, 10000)
         this.bossCaptureTimer = new EnemyTimer(12000, 17000)
         this.diveTimers = [this.beeDiveTimer, this.butterflyDiveTimer, this.bossDiveTimer, this.bossCaptureTimer]
         this.diving = true
         
         this.tractorBeams = []
         this.explosions = []
+        this.missileTimers = []
 
         this.stageTimer = 0
         this.stageSequencesStarted = 0
-        this.stageSequenceLoaded = false
+        this.stageSequenceLoaded = true
         this.enemyPathMaker = new EnemyPathMaker(this.screenWidth, this.screenHeight, enemySize)
-        this.testPath = this.enemyPathMaker.getPath('boss-incoming-2-outer', 20)
-        this.testPath2 = this.enemyPathMaker.getPath('boss-incoming-2-inner', 20)
-        this.showTestPath = true
+        this.testPath = this.enemyPathMaker.getPath('boss-incoming-challenge-left', 20)
+        this.testPath2 = this.enemyPathMaker.getPath('boss-incoming-challenge-right', 20)
+        this.showTestPath = false
         // this.testPath.push(this.enemyGrid.getCell(0, 0).center)
         this.gridState = 'right'
         this.gridMoveRate = 0.015
         this.testBee = new Bee(this.assets['bee'], new Point2d(), this.screenWidth, this.screenHeight)
+    }
+
+    get stageComplete() {
+        return (this.stageSequenceLoaded && this.enemies.length == 0) ? true : false
     }
 
     playDiveSound = () => {
@@ -97,6 +125,19 @@ class EnemySystem {
                 this.screenHeight
             )
         }
+        else if (enemyName == 'momiji' || enemyName == 'tonbo' || enemyName == 'enterprise') {
+            enemy = new Bonus(
+                new Sprite(
+                    this.assets[enemyName],
+                    new Point2d(),
+                    this.assets[enemyName].width,
+                    this.assets[enemyName].height
+                ),
+                new Point2d(),
+                this.screenWidth,
+                this.screenHeight
+            )
+        }
         if (enemy && enemy.sprite instanceof AnimatedSprite && enemy.sprite.numFrames == 2) {
             enemy.sprite.currentFrame = this.enemyGrid.frame
             enemy.sprite.currentCount = this.enemyGrid.frameTimer
@@ -110,11 +151,25 @@ class EnemySystem {
     makeButterfly = () => this.makeEnemy('butterfly')
 
     makeBoss = () => this.makeEnemy('boss')
+    
+    makeMomiji = () => this.makeEnemy('momiji')
+
+    makeTonbo = () => this.makeEnemy('tonbo')
+
+    makeEnterprise = () => this.makeEnemy('enterprise')
 
     makeSequence = (cells, enemies, path, hideDirection, status='formation') => {
         for (let i = 0; i < cells.length; ++i) {
             const cell = this.enemyGrid.getCell(...cells[i])
             const enemy = enemies[i]
+            if (i == 0 && this.stage !== 1) {
+                if (hideDirection.x !== 0) {
+                    this.missileTimers.push(new MissileTimer(enemy, 250, 750))
+                }
+                else {
+                    this.missileTimers.push(new MissileTimer(enemy, 250))
+                }
+            }
             enemy.moveAlongPath([
                 new PathPoint(
                     path[0].x + this.enemySize * hideDirection.x * i,
@@ -124,6 +179,7 @@ class EnemySystem {
                 cell.center
             ], () => {
                 cell.enemy = enemy
+                enemy.moveSpeed = 0.1
                 enemy.status = status
                 enemy.gridCell = new Point2d(...cells[i])
             })
@@ -174,6 +230,9 @@ class EnemySystem {
                 points += 150
             }
         }
+        else if (enemy instanceof Bonus) {
+            points += 150
+        }
         this.game.score += points
     }
 
@@ -201,11 +260,22 @@ class EnemySystem {
         }
     }
 
-    enemyDive = (enemy, pathName, numSamples, callback, returnToGrid=true) => {
+    challengingStageDive = (enemy, pathName, numSamples, callback, offset, offsetDirection) => {
+        const path = this.enemyPathMaker.getPath(pathName, numSamples)
+        const offsetPoint = path[0].copy()
+        offsetPoint.x += offsetDirection.x * this.enemySize * offset
+        offsetPoint.y += offsetDirection.y * this.enemySize * offset
+        enemy.moveAlongPath([offsetPoint, ...path], callback)
+    }
+
+    enemyDive = (enemy, pathName, numSamples, callback, returnToGrid=true, fireMissile=true) => {
         const returnCell = this.enemyGrid.getCell(...enemy.gridCell.coords())
         returnCell.enemy = null
         if (enemy.status !== 'diving') {
             this.playDiveSound()
+        }
+        if (fireMissile) {
+            this.missileTimers.push(new MissileTimer(enemy, 250))
         }
         enemy.status = 'diving'
         const path = this.enemyPathMaker.getPath(pathName, numSamples)
@@ -218,7 +288,7 @@ class EnemySystem {
 
     updateStageSequence = (elapsedTime) => {
         this.stageTimer += elapsedTime
-        if (this.stage == 1) {
+        if (this.stage % 3 == 1) {
             if (this.stageSequencesStarted == 0 && this.stageTimer > 500) {
                 this.stageTimer = 0
                 this.stageSequencesStarted += 1
@@ -291,7 +361,7 @@ class EnemySystem {
                 this.stageSequenceLoaded = true
             }
         }
-        else if (this.stage == 2) {
+        else if (this.stage % 3 == 2) {
             if (this.stageSequencesStarted == 0 && this.stageTimer > 500) {
                 this.stageTimer = 0
                 this.stageSequencesStarted += 1
@@ -313,9 +383,6 @@ class EnemySystem {
             else if (this.stageSequencesStarted == 1 && this.stageTimer > 5000) {
                 this.stageTimer = 0
                 this.stageSequencesStarted += 1
-                const bossButterflyCells = [
-                    [1, 3], [2, 3], [1,4], [2,6], [1,5], [3, 3], [1,6], [3,6]
-                ]
                 const bossCells = [
                     [1,3],[1,4],[1,5],[1,6]
                 ]
@@ -324,16 +391,183 @@ class EnemySystem {
                 ]
                 this.makeSequence(
                     bossCells,
-                    Array.from(Array(bossCells.length), (x) => x = this.makeBoss()),
+                    Array.from(Array(bossCells.length), (x) => {
+                        x = this.makeBoss()
+                        x.moveSpeed = 0.125
+                        return x
+                    }),
                     this.enemyPathMaker.getPath('boss-incoming-2-outer', 10),
                     new Point2d(-1, 0)
                 )
                 this.makeSequence(
                     butterflyCells,
-                    Array.from(Array(butterflyCells.length), (x) => x = this.makeButterfly()),
+                    Array.from(Array(butterflyCells.length), (x) => {
+                        x = this.makeButterfly()
+                        x.moveSpeed = 0.085
+                        return x
+                    }),
                     this.enemyPathMaker.getPath('boss-incoming-2-inner', 10),
                     new Point2d(-1, 0)
                 )
+            }
+            else if (this.stageSequencesStarted == 2 && this.stageTimer > 5000) {
+                this.stageTimer = 0
+                this.stageSequencesStarted += 1
+                const outerCells = [[2,1], [2,8], [3,1], [3,8]]
+                const innerCells = [[2,7], [2,2], [3,7], [3,2]]
+                this.makeSequence(
+                    outerCells,
+                    Array.from(Array(outerCells.length), (x) => {
+                        x = this.makeButterfly()
+                        x.moveSpeed = 0.125
+                        return x
+                    }),
+                    this.enemyPathMaker.getPath('butterfly-incoming-3-outer', 10),
+                    new Point2d(1, 0)
+                )                
+                this.makeSequence(
+                    innerCells,
+                    Array.from(Array(innerCells.length), (x) => {
+                        x = this.makeButterfly()
+                        x.moveSpeed = 0.085
+                        return x
+                    }),
+                    this.enemyPathMaker.getPath('butterfly-incoming-3-inner', 10),
+                    new Point2d(1, 0)
+                )
+            }
+            else if (this.stageSequencesStarted == 3 && this.stageTimer > 5000) {
+                this.stageSequencesStarted += 1
+                this.stageTimer = 0
+                const outerCells = [[4,2], [4,7], [5,2], [5,7]]
+                const innerCells = [[4,6], [4,3], [5,6], [5,3]]
+                this.makeSequence(
+                    outerCells,
+                    Array.from(Array(outerCells.length), (x) => {
+                        x = this.makeBee()
+                        return x
+                    }),
+                    this.enemyPathMaker.getPath('bee-incoming-2-outer', 10),
+                    new Point2d(0, -1)
+                )                
+                this.makeSequence(
+                    innerCells,
+                    Array.from(Array(innerCells.length), (x) => {
+                        x = this.makeBee()
+                        return x
+                    }),
+                    this.enemyPathMaker.getPath('bee-incoming-2-inner', 10),
+                    new Point2d(0, -1)
+                )
+            }
+            else if (this.stageSequencesStarted == 4 && this.stageTimer > 5000) {
+                this.stageSequencesStarted += 1
+                this.stageTimer = 0
+                const innerCells = [[4,0], [4,9], [5,0], [5,8]]
+                const outerCells = [[4,8], [4,1], [5,1], [5,9]]
+                this.makeSequence(
+                    outerCells,
+                    Array.from(Array(outerCells.length), x => { 
+                        x = this.makeBee()
+                        return x
+                    }),
+                    this.enemyPathMaker.getPath('bee-incoming-3-outer', 10),
+                    new Point2d(0, -1)
+                )                
+                this.makeSequence(
+                    innerCells,
+                    Array.from(Array(innerCells.length), x => { 
+                        x = this.makeBee()
+                        return x
+                    }),
+                    this.enemyPathMaker.getPath('bee-incoming-3-inner', 10),
+                    new Point2d(0, -1)
+                )
+            }
+            else if (this.stageSequencesStarted == 5 && this.stageTimer > 5000) {
+                this.stageTimer = 0
+                this.stageSequencesStarted += 1
+                this.stageSequenceLoaded = true
+            }
+        }
+        else if (this.stage % 3 == 0) {
+            if (this.stageSequencesStarted == 0 && this.stageTimer > 500) {
+                this.stageTimer = 0
+                this.stageSequencesStarted += 1
+                const leftBees = Array.from(Array(4), x => x = this.makeBee())
+                const rightBees = Array.from(Array(4), x => x = this.makeBee())
+                for (let i = 0; i < leftBees.length; ++i) {
+                    this.challengingStageDive(leftBees[i], 'bee-incoming-challenge-left', 10, () =>{
+                        leftBees[i].alive = false
+                    }, i, new Point2d(0,-1))
+                }
+                for (let i = 0; i < rightBees.length; ++i) {
+                    this.challengingStageDive(rightBees[i], 'bee-incoming-challenge-right', 10, () => {
+                        rightBees[i].alive = false
+                    }, i, new Point2d(0, -1))
+                }
+            }
+            else if (this.stageSequencesStarted == 1 && this.stageTimer > 6000) {
+                this.stageTimer = 0
+                this.stageSequencesStarted += 1
+                const enemies = Array.from(Array(8), (x, index) => {
+                    if (index % 2 == 0) {
+                        x = this.makeBoss()
+                    }
+                    else {
+                        x = this.makeButterfly()
+                    }
+                    return x
+                })
+                for (let i = 0; i < enemies.length; ++i) {
+                    this.challengingStageDive(enemies[i], 'boss-incoming-challenge-left', 10, () =>  {
+                        enemies[i].alive = false
+                    }, i, new Point2d(-1, 0))
+                }
+            }
+            else if (this.stageSequencesStarted == 2 && this.stageTimer > 6000) {
+                this.stageTimer = 0
+                this.stageSequencesStarted += 1
+                const enemies = Array.from(Array(8), (x, index) => {
+                    x = (index % 2 == 0) ? this.makeButterfly() : this.makeTonbo()
+                    return x
+                })
+                for (let i = 0; i < enemies.length; ++i) {
+                    this.challengingStageDive(enemies[i], 'boss-incoming-challenge-right', 10, () => {
+                        enemies[i].alive = false
+                    }, i, new Point2d(1, 0))
+                }
+            }
+            else if (this.stageSequencesStarted == 3 && this.stageTimer > 6000) {
+                this.stageTimer = 0
+                this.stageSequencesStarted += 1
+                const enemies = Array.from(Array(8), (x, index) => {
+                    x = (index % 2 == 0) ? this.makeBee() : this.makeMomiji()
+                    return x
+                })
+                for (let i = 0; i < enemies.length; ++i) {
+                    this.challengingStageDive(enemies[i], 'bee-incoming-challenge-left', 10, () => {
+                        enemies[i].alive = false
+                    }, i, new Point2d(0, -1))
+                }
+            }            
+            else if (this.stageSequencesStarted == 4 && this.stageTimer > 6000) {
+                this.stageTimer = 0
+                this.stageSequencesStarted += 1
+                const enemies = Array.from(Array(8), (x, index) => {
+                    x = (index %2 == 0) ? this.makeBee() : this.makeEnterprise() 
+                    return x
+                })
+                for (let i = 0; i < enemies.length; ++i) {
+                    this.challengingStageDive(enemies[i], 'bee-incoming-challenge-right', 10, () => {
+                        enemies[i].alive = false
+                    }, i, new Point2d(0, -1))
+                }
+            }
+            else if (this.stageSequencesStarted == 5 && this.stageTimer > 6000) {
+                this.stageTimer = 0
+                this.stageSequenceLoaded = true
+                this.stageSequencesStarted += 1 
             }
         }
     }
@@ -407,10 +641,22 @@ class EnemySystem {
             if (selectedEnemy !== null) {
                 const returnCell = this.enemyGrid.getCell(...selectedEnemy.gridCell.coords())
                 const direction = (selectedEnemy.gridCell.y < this.enemyGrid.cols / 2) ? 'left' : 'right'
-                this.enemyDive(selectedEnemy, `bee-diving-${direction}`, 10, () => {
-                    returnCell.enemy = selectedEnemy
-                    selectedEnemy.status = 'formation'
-                })
+                if (this.game.stage == 2 && Math.random() < 0.5) {
+                    this.enemyDive(selectedEnemy, `bee-diving-${direction}-loop-start`, 10, () => {
+                        selectedEnemy.position.y = 0
+                        selectedEnemy.position.x = (direction == 'left') ? this.screenWidth / 4 : (3 * this.screenWidth) / 4
+                        this.enemyDive(selectedEnemy, `bee-diving-${direction}-loop-end`, 10, () => {
+                            returnCell.enemy = selectedEnemy
+                            selectedEnemy.status = 'formation'
+                        }, true, false)
+                    }, false)
+                }
+                else {
+                    this.enemyDive(selectedEnemy, `bee-diving-${direction}`, 10, () => {
+                        returnCell.enemy = selectedEnemy
+                        selectedEnemy.status = 'formation'
+                    })
+                }
             }
         }
         this.butterflyDiveTimer.update(elapsedTime)
@@ -426,7 +672,7 @@ class EnemySystem {
                     this.enemyDive(selectedEnemy, `butterfly-diving-${direction}-end`, 10, () => {
                         returnCell.enemy = selectedEnemy
                         selectedEnemy.status = 'formation'
-                    })
+                    }, true, false)
                 }, false)
             }
         }
@@ -445,7 +691,7 @@ class EnemySystem {
                     this.enemyDive(selectedEnemy, `boss-diving-${direction}-end`, 10, () => {
                         returnCell.enemy = selectedEnemy
                         selectedEnemy.status = 'formation'
-                    })
+                    }, true, false)
                 }, false)
                 for (let i = 0; i < escorts.length; ++i) {
                     const escort = escorts[i]
@@ -457,8 +703,8 @@ class EnemySystem {
                         this.enemyDive(escort, `boss-diving-${direction}-end`, 10, () => {
                             escortCell.enemy = escort
                             escort.status = 'formation'
-                        })
-                    }, false)
+                        }, true, false)
+                    }, false, false)
                 }
             }
         }
@@ -488,13 +734,12 @@ class EnemySystem {
     }
 
     update = (elapsedTime) => {
-        if (!this.stageSequenceLoaded) {
-            this.updateStageSequence(elapsedTime)
-        }
-        else {
-            this.updateDivingSequence(elapsedTime)
-            if (this.enemies.length == 0) {
-                this.game.nextStage()
+        if (!this.game.transitioningStage) {
+            if (!this.stageSequenceLoaded) {
+                this.updateStageSequence(elapsedTime)
+            }
+            else {
+                this.updateDivingSequence(elapsedTime)
             }
         }
         const keepEnemies = []
@@ -516,6 +761,18 @@ class EnemySystem {
         if (!this.testBee.movingAlongPath) {
             this.testBee.moveAlongPath(this.testPath)
         }
+        const keepMissileTimers = []
+        for (let i = 0; i < this.missileTimers.length; ++i) {
+            this.missileTimers[i].update(elapsedTime)
+            if (this.missileTimers[i].ready) {
+                this.missileSystem.fireEnemyMissile(this.missileTimers[i].enemy.position.copy())
+                this.missileTimers[i].restart()
+            }
+            if (this.missileTimers[i].alive) {
+                keepMissileTimers.push(this.missileTimers[i])
+            }
+        }
+        this.missileTimers = keepMissileTimers
         const keepBeams = []
         for (let i = 0; i < this.tractorBeams.length; ++i) {
             this.tractorBeams[i].update(elapsedTime)
@@ -549,7 +806,7 @@ class EnemySystem {
             for(let i = 1; i < this.testPath.length; ++i) {
                 context.lineTo(...this.testPath[i].coords())
             }
-            context.moveTo(...this.testPath[0].coords())
+            context.moveTo(...this.testPath2[0].coords())
             for (let i = 1; i < this.testPath2.length; ++i) {
                 context.lineTo(...this.testPath2[i].coords())
             }

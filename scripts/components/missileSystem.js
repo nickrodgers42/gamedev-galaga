@@ -1,8 +1,6 @@
 class MissileSystem {
-    constructor(game, player, enemies) {
+    constructor(game) {
         this.game = game
-        this.player = player
-        this.enemies = enemies
         this.playerMissiles = []
         this.enemyMissiles = []
         this.shotsFired = 0
@@ -16,9 +14,22 @@ class MissileSystem {
     firePlayerMissile = (position) => {
         this.playerMissiles.push(new Missile(
             this.game.assets['player-missile'],
-            position
+            position.copy(),
+            this.game.canvas.width,
+            this.game.canvas.height
         ))
         this.shotsFired += 1
+    }
+
+    fireEnemyMissile = (position) => {
+        console.log('fired', position)
+        this.enemyMissiles.push(new EnemyMissile(
+            this.game.assets['enemy-missile'],
+            position.copy(),
+            this.game.canvas.width,
+            this.game.canvas.height,
+            this.game.player.position
+        ))
     }
 
     updateMissiles = (elapsedTime, missiles) => {

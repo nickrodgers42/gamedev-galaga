@@ -288,7 +288,7 @@ class Galaga {
         let hitStr = `NUMBER OF HITS ${this.missileSystem.shotsHit}`
         let accStr = `ACCURACY ${
             (this.missileSystem.shotsFired !== 0) ?
-            (this.missileSystem.shotsHit / this.missileSystem.shotsFired).toFixed(2)
+            ((this.missileSystem.shotsHit / this.missileSystem.shotsFired) * 100).toFixed(2)
             :
             0
         }`

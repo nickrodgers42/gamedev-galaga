@@ -243,6 +243,10 @@ const assetsList = [
     {
         key: 'stage-over',
         source: '../assets/audio/stage-over.mp3'
+    },
+    {
+        key: 'player-kill',
+        source: '../assets/audio/player-kill.mp3'
     }
 ]
 

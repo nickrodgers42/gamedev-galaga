@@ -9,6 +9,7 @@ class Galaga {
         this.gameFont = 'Press Start 2P'
         this.gameOver = false
         this.missileSystem = new MissileSystem(this)
+        this.particleSystem = new ParticleSystem(this.context)
         this.player = new Player(
             this.assets['ship'], 
             this.assets['shoot'],
@@ -46,11 +47,13 @@ class Galaga {
             'enemy-kill',
             'enemy-hit',
             'level-start',
-            'stage-over'
+            'stage-over',
+            'player-kill'
         ]
         this.assets['enemy-hit'].volume = 0.3
         this.assets['level-start'].volume = 0.3
         this.assets['stage-over'].volume = 0.3
+        this.assets['player-kill'].volume = 0.3
         this.enemySystem = new EnemySystem(this, this.assets, this.canvas.width, this.canvas.height, 16)
         this.playerExplosion = null
         this.playThemeSong = true
@@ -112,11 +115,13 @@ class Galaga {
             this.stars.moving = false
         }
         this.lostLife = true
-        this.lifeTransitionTimer = 5000
+        this.lifeTransitionTimer = this.assets['player-kill'].duration * 1000 + 1000
+        this.assets['player-kill'].play()
     }
 
     playerExplode = () => {
         this.renderPlayer = false
+        this.particleSystem.explosion(this.player.position.copy())
         this.playerExplosion = new Explosion(
             this.assets['ship-explode'],
             this.player.position.copy(),
@@ -197,6 +202,7 @@ class Galaga {
                 this.updateTransition(elapsedTime)
             }
             this.missileSystem.update(elapsedTime)
+            this.particleSystem.update(elapsedTime)
             this.enemySystem.update(elapsedTime)
             if (this.lostLife) {
                 this.updateLifeTransitionTimer(elapsedTime)
@@ -250,8 +256,11 @@ class Galaga {
         if (this.lostLife && this.lifeTransitionTimer <= 2000) {
             this.renderReadyText()
         }
-        if (this.playerExplosion !== null) {
+        if (this.playerExplosion !== null && this.gameStyle['Style'] !== 'GameDev') {
             this.playerExplosion.render(this.context, 0)
+        }
+        if (this.gameStyle['Style'] == 'GameDev') {
+            this.particleSystem.render()
         }
         if (this.transitioningStage && this.stage == 1) {
             this.renderScore()
@@ -277,6 +286,13 @@ class Galaga {
         const fontSize = 8
         let firedStr = `SHOTS FIRED ${this.missileSystem.shotsFired}`
         let hitStr = `NUMBER OF HITS ${this.missileSystem.shotsHit}`
+        let accStr = `ACCURACY ${
+            (this.missileSystem.shotsFired !== 0) ?
+            (this.missileSystem.shotsHit / this.missileSystem.shotsFired).toFixed(2)
+            :
+            0
+        }`
+            
         this.context.fillText(
             firedStr,
             Math.floor(this.canvas.width / 2 - this.context.measureText(firedStr).width / 2),
@@ -286,6 +302,11 @@ class Galaga {
             hitStr,
             Math.floor(this.canvas.width / 2 - this.context.measureText(hitStr).width / 2),
             Math.floor(this.canvas.height / 2 + fontSize)
+        )
+        this.context.fillText(
+            accStr,
+            Math.floor(this.canvas.width / 2 - this.context.measureText(accStr).width / 2),
+            Math.floor(this.canvas.height / 2 + fontSize * 3)
         )
         this.context.restore()
     }

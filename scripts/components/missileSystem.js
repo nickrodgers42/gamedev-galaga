@@ -22,7 +22,6 @@ class MissileSystem {
     }
 
     fireEnemyMissile = (position) => {
-        console.log('fired', position)
         this.enemyMissiles.push(new EnemyMissile(
             this.game.assets['enemy-missile'],
             position.copy(),

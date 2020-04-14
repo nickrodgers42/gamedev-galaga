@@ -4,8 +4,6 @@ class ParticleSystem {
         this.particles = []   
         this.landerThrustRate = 0.5
         this.landerCrashRate = 0.5
-        this.fireSprite = new SpriteObject(0, 0, './assets/fire.png')
-        this.smokeSprite = new SpriteObject(0, 0, './assets/smoke-2.png')
     }
 
     landerThrust = (elapsedTime, lander) => {
@@ -26,6 +24,35 @@ class ParticleSystem {
                         lander.rotation + (5 * Math.PI) / 4,
                         lander.rotation + (7 * Math.PI) / 4
                     )
+                }
+            ))
+        }
+    }
+
+    explosion = (position) => {
+        const particlesToMake = 300
+        for (let i = 0 ; i < particlesToMake; ++i) {
+            let color = 'red'
+            const randVal = Random.randGaussian(0, 1)
+            if (randVal > 0.5 && randVal < 1) {
+                color = 'gray'
+            }
+            else if (randVal >= 1) {
+                color = 'yellow'
+            }
+            this.particles.push(new Particle(
+                position.x,
+                position.y,
+                {
+                    image: null,
+                    fill: color,
+                    size: {
+                        x: Random.randGaussian(1, 1),
+                        y: Random.randGaussian(1, 1),
+                    },
+                    speed: Random.randFloat(0, 0.05),
+                    lifetime: Random.randGaussian(250, 250),
+                    direction: Random.randCircleVector()
                 }
             ))
         }
@@ -67,6 +94,27 @@ class ParticleSystem {
         this.particles = aliveParticles
     }
 
+    drawRectangle = (particle) => {
+        this.context.save()
+        this.context.translate(
+            particle.center.x,
+            particle.center.y
+        )
+        this.context.rotate(particle.rotation)
+        this.context.translate(
+            -particle.center.x,
+            -particle.center.y
+        )
+        this.context.fillStyle= particle.fill
+        this.context.fillRect(
+            Math.floor(particle.center.x - particle.size.x / 2),
+            Math.floor(particle.center.y - particle.size.y / 2),
+            Math.floor(particle.size.x),
+            Math.floor(particle.size.y)
+        )
+        this.context.restore()
+    }
+
     drawSprite = (particle) => {
         this.context.save()
         this.context.translate(
@@ -93,7 +141,12 @@ class ParticleSystem {
 
     render = () => {
         for (let i = 0; i < this.particles.length; ++i) {
-            this.drawSprite(this.particles[i])
+            if (this.particles[i].image !== null) {
+                this.drawSprite(this.particles[i])
+            }
+            else {
+                this.drawRectangle(this.particles[i])
+            }
         }
     }
 }

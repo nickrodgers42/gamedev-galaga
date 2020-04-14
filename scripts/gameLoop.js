@@ -52,7 +52,6 @@ class GameLoop {
             return 0
         }
         const highScore = scores.reduce((acc, val) => {
-            console.log(val)
             if (val.score > acc) {
                 acc = val
             }

@@ -189,6 +189,7 @@ class EnemySystem {
     makeExplosion = (enemy) => {
         this.assets['enemy-kill'].currentTime = 0
         this.assets['enemy-kill'].play()
+        this.game.particleSystem.explosion(enemy.position.copy())
         this.explosions.push(new Explosion(
             this.assets['enemy-explode'],
             enemy.position.copy(),
@@ -796,7 +797,9 @@ class EnemySystem {
             this.enemies[i].render(context)
         }
         for (let i = 0; i < this.explosions.length; ++i) {
-            this.explosions[i].render(context)
+            if (this.game.gameStyle['Style'] != 'GameDev') {
+                this.explosions[i].render(context)
+            }
         }
         if (this.showTestPath) {
             context.strokeStyle='red'

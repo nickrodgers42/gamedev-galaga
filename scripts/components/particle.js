@@ -4,7 +4,7 @@ class Particle {
     constructor(x, y, options) {
         this.center = new Point2d(x, y)
         this.image = (options.image == null) ?
-            noImage : options.image
+            null : options.image
         this.rotation = (options.rotation == null) ?
             0 : options.rotation
         this.size = (options.size == null) ?

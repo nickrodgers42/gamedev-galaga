@@ -51,7 +51,14 @@ class GameLoop {
         if (scores.length == 0) {
             return 0
         }
-        return Math.max(...scores)
+        const highScore = scores.reduce((acc, val) => {
+            console.log(val)
+            if (val.score > acc) {
+                acc = val
+            }
+            return acc
+        })
+        return Math.round(highScore.score)
     }
 
     registerGameControls = () => {

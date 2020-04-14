@@ -7,6 +7,7 @@ class Galaga {
         this.canvas = document.getElementById('game-canvas')
         this.context = this.canvas.getContext('2d')
         this.gameFont = 'Press Start 2P'
+        this.gameOver = false
         this.missileSystem = new MissileSystem(this)
         this.player = new Player(
             this.assets['ship'], 
@@ -35,6 +36,7 @@ class Galaga {
         this.transitionTimer = 0
         this.lostLife = false
         this.lifeTransitionTimer = 0
+        this.gameOverTransition = false
 
         this.audioAssets = [
             'theme-song', 
@@ -43,10 +45,12 @@ class Galaga {
             'enemy-incoming', 
             'enemy-kill',
             'enemy-hit',
-            'level-start'
+            'level-start',
+            'stage-over'
         ]
         this.assets['enemy-hit'].volume = 0.3
         this.assets['level-start'].volume = 0.3
+        this.assets['stage-over'].volume = 0.3
         this.enemySystem = new EnemySystem(this, this.assets, this.canvas.width, this.canvas.height, 16)
         this.playerExplosion = null
         this.playThemeSong = true
@@ -143,7 +147,7 @@ class Galaga {
             }
             for (let j = 0; j < this.missileSystem.enemyMissiles.length; ++j) {
                 const missile = this.missileSystem.enemyMissiles[j]
-                if (missile.position.distanceTo(this.player.position) < missile.hitboxRadius + this.player.hitboxRadius) {
+                if (missile.position.distanceTo(this.player.position) < missile.hitboxRadius + this.player.hitboxRadius && !this.lostLife) {
                     this.playerExplode()
                     this.player.crash()
                     this.nextLife()
@@ -163,7 +167,21 @@ class Galaga {
         } 
         if (this.lifeTransitionTimer <= 0) {
             this.lostLife = false
-            this.enemySystem.startDiving()
+            if (this.player.lives !== 0) {
+                this.enemySystem.startDiving()
+            }
+            else {
+                this.gameOverTransition = true
+                this.transitionTimer = this.assets['stage-over'].duration * 1000
+                this.assets['stage-over'].play()
+            }
+        }
+    }
+
+    updateGameOverTransition = (elapsedTime) => {
+        this.transitionTimer -= elapsedTime
+        if (this.transitionTimer <= 0) {
+            this.gameOver = true
         }
     }
 
@@ -182,6 +200,9 @@ class Galaga {
             this.enemySystem.update(elapsedTime)
             if (this.lostLife) {
                 this.updateLifeTransitionTimer(elapsedTime)
+            }
+            if (this.gameOverTransition) {
+                this.updateGameOverTransition(elapsedTime)
             }
             this.detectCollisions()
             if (this.playerExplosion !== null) {
@@ -209,13 +230,22 @@ class Galaga {
 
     render = () => {
         this.drawBackground()
-        this.missileSystem.render(this.context)
-        this.enemySystem.render(this.context)
-        if (this.transitioningStage) {
-            this.renderStageText()
+        if (!this.gameOverTransition) {
+            this.missileSystem.render(this.context)
+            this.enemySystem.render(this.context)
         }
-        if (this.renderPlayer) {
-            this.player.render(this.context)
+        if (this.player.lives !== 0) {
+            if (this.transitioningStage) {
+                this.renderStageText()
+            }
+            if (this.renderPlayer) {
+                this.player.render(this.context)
+            }
+        }
+        else {
+            if (this.gameOverTransition) {
+                this.renderShotCount()
+            }
         }
         if (this.lostLife && this.lifeTransitionTimer <= 2000) {
             this.renderReadyText()
@@ -231,6 +261,35 @@ class Galaga {
         }
     }
 
+    setFont = (context) => {
+        context.fillStyle = '#00FFFF'
+        context.strokeStyle = '#00FFFF'
+        const fontSize = 8
+        const fontStr = `${fontSize}px "${this.gameFont}"`
+        context.font = document.fonts.check(fontStr) ? fontStr : `${fontStr}px monsopace`
+        context.textBaseline = 'top'
+        context.textBaseline = 'left'
+    }
+
+    renderShotCount = () => {
+        this.context.save()
+        this.setFont(this.context)
+        const fontSize = 8
+        let firedStr = `SHOTS FIRED ${this.missileSystem.shotsFired}`
+        let hitStr = `NUMBER OF HITS ${this.missileSystem.shotsHit}`
+        this.context.fillText(
+            firedStr,
+            Math.floor(this.canvas.width / 2 - this.context.measureText(firedStr).width / 2),
+            Math.floor(this.canvas.height / 2 - fontSize)
+        )
+        this.context.fillText(
+            hitStr,
+            Math.floor(this.canvas.width / 2 - this.context.measureText(hitStr).width / 2),
+            Math.floor(this.canvas.height / 2 + fontSize)
+        )
+        this.context.restore()
+    }
+
     renderReadyText = () => {
         this.context.save()
         this.context.fillStyle = '#00FFFF'
@@ -240,7 +299,10 @@ class Galaga {
         this.context.font = document.fonts.check(fontStr) ? fontStr : `${fontStr}px monsopace`
         this.context.textBaseline = 'top'
         this.context.textBaseline = 'left'
-        const readyStr = 'READY'
+        let readyStr = 'READY'
+        if (this.player.lives == 0) {
+            readyStr = 'GAME OVER'
+        }
         this.context.fillText(
             readyStr,
             Math.floor(this.canvas.width / 2 - this.context.measureText(readyStr).width / 2),

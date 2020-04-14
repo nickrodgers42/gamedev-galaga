@@ -239,6 +239,10 @@ const assetsList = [
     {
         key: 'enemy-missile',
         source: '../assets/images/enemy-missile.png'
+    },
+    {
+        key: 'stage-over',
+        source: '../assets/audio/stage-over.mp3'
     }
 ]
 

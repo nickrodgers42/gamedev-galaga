@@ -9,7 +9,7 @@ class Game {
             'Pause': 'Escape'
         }
         this.gameStyle = {
-            'Style': 'Retro'
+            'Style': 'GameDev'
         }
         this.init = () => {
             this.storageController = new StorageController('gamedev-galaga')

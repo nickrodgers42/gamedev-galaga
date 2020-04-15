@@ -21,7 +21,7 @@ class GameOver extends Screen {
 
     run = () => {
         const scoreDiv = document.getElementById('player-score')
-        scoreDiv.innerHTML = this.controller.score.toFixed(2)
+        scoreDiv.innerHTML = Number(this.controller.score.toFixed(2))
         this.controller.registerMenuInputs()
         this.controller.buttons = this.buttons
     }

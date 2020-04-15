@@ -21,11 +21,12 @@ class HighScores extends Screen {
                 <th>Score</th>
             </tr>`
         const highScores = this.storageController.get('scores')
+        console.log(highScores)
         highScores.sort((a, b) => {
-            if (a.score > b.score) {
+            if (Number(a.score) > Number(b.score)) {
                 return -1
             }
-            else if (b.score > a.score) {
+            else if (Number(a.score) < Number(b.score)) {
                 return 1
             }
             else if (a.name < b.name) {
@@ -40,7 +41,7 @@ class HighScores extends Screen {
             if (i < highScores.length) {
                 innerHTML += `<tr><td>${i + 1}</td>
                     <td>${highScores[i].name}</td>
-                    <td>${highScores[i].score}</td></tr>`
+                    <td>${Number(highScores[i].score)}</td></tr>`
             }
             else {
                 innerHTML += `<tr></tr>`

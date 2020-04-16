@@ -1,11 +1,12 @@
 class ControlsScreen extends Screen {
-    constructor(controller, inputHandler, controlMap) {
+    constructor(controller, inputHandler, controlMap, storageController) {
         super(controller)
         this.inputHandler = inputHandler
         this.controlMap = controlMap
         this.defaultControls = JSON.parse(JSON.stringify(this.controlMap))
         this.controlBeingMapped = null
         this.buttonIds = {}
+        this.storageController = storageController
     }
     
     goBack = () => {
@@ -47,6 +48,10 @@ class ControlsScreen extends Screen {
             const controlId = control.split(' ').join('-')
             this.buttonIds[control] = controlId
         }
+        const storedControls = this.storageController.get('controls')
+        if (storedControls.length == 0) {
+            this.storageController.add('controls', this.defaultControls)
+        }
     }
 
     remapControl = async (control) => {
@@ -58,6 +63,7 @@ class ControlsScreen extends Screen {
             const key = await this.inputHandler.captureNextKeyPress()
             this.setControl(control, key)
             this.controlBeingMapped = null
+            this.storageController.set('controls', this.controlMap)
             this.updateButtons()
         }
     }
@@ -89,6 +95,10 @@ class ControlsScreen extends Screen {
     }
 
     run = () => {
+        const controls = this.storageController.get('controls')[0]
+        for (const control in controls) {
+            this.controlMap[control] = controls[control]
+        }
         this.updateButtons()
     }
 }

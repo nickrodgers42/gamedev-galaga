@@ -25,7 +25,7 @@ class Game {
             )
 
             this.screens['main-menu'] = new MainMenu(this.controller, this.inputHandler)
-            this.screens['controls'] = new ControlsScreen(this.controller,this.inputHandler, this.defaultControls)
+            this.screens['controls'] = new ControlsScreen(this.controller,this.inputHandler, this.defaultControls, this.storageController)
             this.screens['high-scores'] = new HighScores(this.controller, this.storageController)
             this.screens['about'] = new About(this.controller, this.gameStyle)
             this.screens['game-screen'] = new GameScreen(this.controller, this.inputHandler, this.gameLoop, this.defaultControls)

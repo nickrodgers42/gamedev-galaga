@@ -18,6 +18,16 @@ class StorageController {
         localStorage[this.name] = JSON.stringify(this.data)
     }
 
+    set = (key, value) =>  {
+        if (Array.isArray(value)) {
+            this.data[key] = value
+        }
+        else {
+            this.data[key] = [value]
+        }
+        localStorage[this.name] = JSON.stringify(this.data)
+    }
+
     remove = (key) => {
         delete this.data[key]
         localStorage[this.name] = JSON.stringify(this.data)

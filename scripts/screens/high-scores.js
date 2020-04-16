@@ -21,7 +21,6 @@ class HighScores extends Screen {
                 <th>Score</th>
             </tr>`
         const highScores = this.storageController.get('scores')
-        console.log(highScores)
         highScores.sort((a, b) => {
             if (Number(a.score) > Number(b.score)) {
                 return -1

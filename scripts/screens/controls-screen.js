@@ -38,6 +38,7 @@ class ControlsScreen extends Screen {
                 this.controlMap[control] = this.defaultControls[control]
             }
             this.controlBeingMapped = null
+            this.storageController.set('controls', this.defaultControls)
             this.updateButtons()
         }
     }
